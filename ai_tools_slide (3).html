@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Which AI for What?</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  background: #C8C8C8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+#shell {
+  position: relative;
+  width: 100vw;
+  height: 56.25vw;
+  max-height: 100vh;
+  max-width: 177.78vh;
+}
+
+#canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 1280px;
+  height: 720px;
+  transform-origin: top left;
+  background: #F4F4F6;
+  overflow: hidden;
+  box-shadow: 0 8px 48px rgba(0,0,0,0.22);
+}
+
+/* ── Top header bar ── */
+.header {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 88px;
+  background: #1A1A2E;
+  display: flex;
+  align-items: center;
+  padding: 0 36px;
+  justify-content: space-between;
+}
+
+.header-left { display: flex; flex-direction: column; gap: 3px; }
+
+.eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #00B4D8;
+}
+
+.title {
+  font-size: 34px;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.title-accent { color: #00B4D8; }
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.header-meta {
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.03em;
+}
+
+.header-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(0,180,216,0.14);
+  color: #00B4D8;
+  border: 1px solid rgba(0,180,216,0.28);
+  letter-spacing: 0.04em;
+}
+
+/* Gradient bar under header */
+.header-bar {
+  position: absolute;
+  top: 88px; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #1A1A2E 0%, #7B2D8E 45%, #00B4D8 100%);
+}
+
+/* ── 6-column grid ── */
+.columns {
+  position: absolute;
+  top: 91px;
+  left: 20px; right: 20px;
+  bottom: 40px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+/* ── Individual tool card ── */
+.col-card {
+  background: #FFFFFF;
+  border-radius: 10px;
+  border: 1px solid #E5E7EB;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Coloured top strip */
+.col-header {
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid #F3F4F6;
+  flex-shrink: 0;
+}
+
+.col-stripe {
+  height: 3px;
+  border-radius: 2px;
+  margin-bottom: 12px;
+}
+
+.s-blue   { background: #2563EB; }
+.s-green  { background: #059669; }
+.s-purple { background: #7B2D8E; }
+.s-amber  { background: #D97706; }
+.s-teal   { background: #00B4D8; }
+.s-indigo { background: #4F46E5; }
+
+.col-icon {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 9px;
+  flex-shrink: 0;
+}
+.col-icon svg { width: 14px; height: 14px; }
+
+.ib { background: #EFF6FF; }
+.ig { background: #ECFDF5; }
+.ip { background: #FDF4FF; }
+.ia { background: #FFFBEB; }
+.it { background: #E0F7FA; }
+.ii { background: #EEF2FF; }
+
+.col-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+.col-tag {
+  font-size: 10.5px;
+  font-weight: 400;
+  color: #6B7280;
+  line-height: 1.4;
+}
+
+/* ── Card body ── */
+.col-body {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Chips */
+.chips { display: flex; flex-wrap: wrap; gap: 3px; }
+
+.chip {
+  font-size: 8.5px; font-weight: 600;
+  padding: 2px 7px; border-radius: 20px;
+}
+
+.cb { background: #EFF6FF; color: #1D4ED8; }
+.cg { background: #ECFDF5; color: #065F46; }
+.cp { background: #FDF4FF; color: #6B21A8; }
+.ca { background: #FFFBEB; color: #92400E; }
+.ct { background: #E0F7FA; color: #0369A1; }
+.ci { background: #EEF2FF; color: #4338CA; }
+
+/* Section label */
+.section-label {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.lb { color: #2563EB; }
+.lg { color: #059669; }
+.lp { color: #7B2D8E; }
+.la { color: #D97706; }
+.lt { color: #00B4D8; }
+.li { color: #4F46E5; }
+
+/* Body text */
+.body-text {
+  font-size: 10.5px;
+  color: #4B5563;
+  line-height: 1.55;
+}
+
+/* Tinted example block */
+.example-block {
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.eb-blue   { background: #EFF6FF; }
+.eb-green  { background: #ECFDF5; }
+.eb-purple { background: #FDF4FF; }
+.eb-amber  { background: #FFFBEB; }
+.eb-teal   { background: #E0F7FA; }
+.eb-indigo { background: #EEF2FF; }
+
+.example-text {
+  font-size: 10px;
+  font-style: italic;
+  color: #374151;
+  line-height: 1.5;
+}
+
+/* ── Footer ── */
+.footer {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 40px;
+  background: #1A1A2E;
+  display: flex;
+  align-items: center;
+  padding: 0 36px;
+  justify-content: space-between;
+}
+
+.legend { display: flex; gap: 20px; align-items: center; }
+
+.leg-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 9px; color: rgba(255,255,255,0.45);
+}
+
+.leg-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+.footer-note { font-size: 9px; color: rgba(255,255,255,0.25); }
+
+/* Divider line between sections inside a card */
+.col-divider {
+  height: 1px;
+  background: #F3F4F6;
+  flex-shrink: 0;
+}
+
+</style>
+</head>
+<body>
+<div id="shell">
+<div id="canvas">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="eyebrow">AI Quick Reference</div>
+      <div class="title">Which AI for <span class="title-accent">what?</span></div>
+    </div>
+    <div class="header-right">
+      <div class="header-meta">Accenture CS&amp;G &nbsp;·&nbsp; Internal Reference</div>
+      <div class="header-badge">6 Tools &nbsp;·&nbsp; Use Case Guide</div>
+    </div>
+  </div>
+  <div class="header-bar"></div>
+
+  <!-- 6 Columns -->
+  <div class="columns">
+
+    <!-- 1. Microsoft Copilot -->
+    <div class="col-card">
+      <div class="col-header">
+        <div class="col-stripe s-blue"></div>
+        <div class="col-icon ib">
+          <svg viewBox="0 0 14 14" fill="none">
+            <rect x="1" y="1" width="5" height="5" rx="1" fill="#2563EB"/>
+            <rect x="8" y="1" width="5" height="5" rx="1" fill="#2563EB" opacity="0.5"/>
+            <rect x="1" y="8" width="5" height="5" rx="1" fill="#2563EB" opacity="0.5"/>
+            <rect x="8" y="8" width="5" height="5" rx="1" fill="#2563EB" opacity="0.25"/>
+          </svg>
+        </div>
+        <div class="col-name">Microsoft Copilot</div>
+        <div class="col-tag">Your Microsoft 365 layer</div>
+      </div>
+      <div class="col-body">
+        <div>
+          <div class="chips">
+            <span class="chip cb">Emails</span>
+            <span class="chip cb">Files</span>
+            <span class="chip cb">Teams</span>
+            <span class="chip cb">SharePoint</span>
+          </div>
+        </div>
+        <div class="col-divider"></div>
+        <div>
+          <div class="section-label lb">What it does</div>
+          <div class="body-text">Finds things across your Microsoft estate using plain language — emails, documents, Teams messages, and shared drives.</div>
+        </div>
+        <div class="col-divider"></div>
+        <div>
+          <div class="section-label lb">When to use</div>
+          <div class="body-text">Best when the answer lives inside your Microsoft tools. Works across the whole org, not just your own inbox.</div>
+        </div>
+        <div class="example-block eb-blue" style="margin-top:auto;">
+          <div class="section-label lb" style="margin-bottom:4px;">Example</div>
+          <div class="example-text">"Find all emails from Lee Bond about overtime costs" or "Locate the SSB capacity model in SharePoint"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. ChatGPT -->
+    <div class="col-card">
+      <div class="col-header">
+        <div class="col-stripe s-green"></div>
+        <div class="col-icon ig">
+          <svg viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="5.5" stroke="#059669" stroke-width="1.1" fill="none"/>
+            <path d="M4.5 7.8C5 9.2 9 9.2 9.5 7.8" stroke="#059669" stroke-width="1" stroke-linecap="round" fill="none"/>
+            <circle cx="5" cy="6" r="0.8" fill="#059669"/>
+            <circle cx="9" cy="6" r="0.8" fill="#059669"/>
+          </svg>
+        </div>
+        <div class="col-name">ChatGPT</div>
+        <div class="col-tag">Working through hard problems</div>
+      </div>
+      <div class="col-body">
+        <div>
+          <div class="chips">
+            <span class="chip cg">Problem-solving</span>
+            <span class="chip cg">Frameworks</span>
+            <span class="chip cg">Reasoning</span>
+          </div>
+        </div>
+        <div class="col-divider"></div>
+        <div>
+          <div class="section-label lg">What it does</div>
+          <div class="body-text">Multi-step reasoning and detailed instruction-following. Holds logic and structure well across a long, multi-turn conversation.</div>
+        </div>
+        <div class="col-divider"></div>
+        <div>
+          <div class="section-label lg">When to use</div>
+          <div class="body-text">Give it rich context and push with follow-ons. Best for structured thinking — not quick lookups.</div>
+        </div>
+        <div class="example-block eb-green" style="margin-top:auto;">
+          <div class="section-label lg" style="margin-bottom:4px;">Example</div>
+          <div class="example-text">"How do I build a value framework across cost, quality &amp; revenue without double-counting?"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Claude -->
+    <div class="col-card">
+      <div class="col-header">
+        <div class="col-stripe s-purple"></div>
+        <div class="col-icon ip">
+          <svg viewBox="0 0 14 14" fill="none">
+            <path d="M7 1.5L11 4.2V9.8L7 12.5L3 9.8V4.2L7 1.5Z" stroke="#7B2D8E" stroke-width="1.1" fill="none" stroke-linejoin="round"/>
+            <path d="M7 4.2L9.5 5.8V8.4L7 10L4.5 8.4V5.8L7 4.2Z" fill="#7B2D8E" opacity="0.22"/>
+          </svg>
+        </div>
+        <div class="col-name">Claude</div>
+        <div class="col-tag">Build &amp; create things</div>
+      </div>
+      <div class="col-body">
+        <div>
+          <div class="chips">
+            <span class="chip cp">Dashboards</span>
+            <span class="chip cp">Documents</span>
+            <span class="chip cp">Anticipates needs</span>
+          </div>
+        </div>
+        <div class="col-divider"></div>
+        <div>
+          <div class="section-label lp">What it does</div>
+          <div class="body-text">Builds structured outputs — dashboards, trackers, decks, documents — and intuitively works ahead without being explicitly asked.</div>
+        </div>
+        <div class="col-divider"></div>
+        <div>
+          <div class="section-label lp">When to use</div>
+          <div class="body-text">Strong on professional writing, code, and structured deliverables. Picks up on context and works ahead of you.</div>
+        </div>
+        <div class="example-block eb-purple" style="margin-top:auto;">
+          <div class="section-label lp" style="margin-bottom:4px;">Example</div>
+          <div class="example-text">"Build me a pipeline dashboard from this data" — it will suggest KPIs, layout &amp; filters unprompted</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Gemini + NotebookLM -->
+    <div class="col-card">
+      <div class="col-header">
+        <div class="col-stripe s-amber"></div>
+        <div class="col-icon ia">
+          <svg viewBox="0 0 14 14" fill="none">
+            <path d="M7 1.5C7 1.5 10.5 4 10.5 7C10.5 10 7 12.5 7 12.5C7 12.5 3.5 10 3.5 7C3.5 4 7 1.5 7 1.5Z" fill="#D97706" opacity="0.45"/>
+            <path d="M1.5 7C1.5 7 4 4.5 7 4.5C10 4.5 12.5 7 12.5 7C12.5 7 10 9.5 7 9.5C4 9.5 1.5 7 1.5 7Z" fill="#D97706" opacity="0.28"/>
+          </svg>
+        </div>
+        <div class="col-name">Gemini + NotebookLM</div>
+        <div class="col-tag">Images &amp; doc-grounded AI</div>
+      </div>
+      <div class="col-body">
+        <div>
+          <div class="chips">
+            <span class="chip ca">Image gen</span>
+            <span class="chip ca">Presentations</span>
+            <span class="chip ca">Docs-only LLM</span>
+          </div>
+        </div>
+        <div class="col-divider"></div>
+        <div>
+          <div class="section-label la">What it does</div>
+          <div class="body-text">Gemini leads on image creation. NotebookLM acts as an AI only on the documents you upload — preventing hallucination by design.</div>
+        </div>
+        <div class="col-divider"></div>
+        <div>
+          <div class="section-label la">Key callout</div>
+          <div class="body-text">NotebookLM = a small language model on your own documents. Also generates quick presentations from those same docs.</div>
+        </div>
+        <div class="example-block eb-amber" style="margin-top:auto;">
+          <div class="section-label la" style="margin-bottom:4px;">Example</div>
+          <div class="example-text">Upload your project docs — ask questions, get answers grounded only in those sources. Zero hallucination risk.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. AlphaSense -->
+    <div class="col-card">
+      <div class="col-header">
+        <div class="col-stripe s-teal"></div>
+        <div class="col-icon it">
+          <svg viewBox="0 0 14 14" fill="none">
+            <circle cx="6" cy="6" r="3.8" stroke="#00B4D8" stroke-width="1.1" fill="none"/>
+            <line x1="8.7" y1="8.7" x2="12" y2="12" stroke="#00B4D8" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="6" y1="4" x2="6" y2="8" stroke="#00B4D8" stroke-width="0.9" stroke-linecap="round"/>
+            <line x1="4" y1="6" x2="8" y2="6" stroke="#00B4D8" stroke-width="0.9" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="col-name">AlphaSense</div>
+        <div class="col-tag">Expert &amp; institutional research</div>
+      </div>
+      <div class="col-body">
+        <div>
+          <div class="chips">
+            <span class="chip ct">Expert transcripts</span>
+            <span class="chip ct">Earnings calls</span>
+            <span class="chip ct">Cited sources</span>
+          </div>
+        </div>
+        <div class="col-divider"></div>
+        <div>
+          <div class="section-label lt">What it does</div>
+          <div class="body-text">Premium access to expert calls, analyst transcripts, broker notes &amp; regulatory filings. Every answer links to a verified primary source.</div>
+        </div>
+        <div class="col-divider"></div>
+        <div>
+          <div class="section-label lt">When to use</div>
+          <div class="body-text">Use when you need to know what executives, analysts, or regulators have said — with full citations.</div>
+        </div>
+        <div class="example-block eb-teal" style="margin-top:auto;">
+          <div class="section-label lt" style="margin-bottom:4px;">Example</div>
+          <div class="example-text">"What are water utility CEOs saying about AMP8 investment priorities?" — with full transcript quotes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Perplexity -->
+    <div class="col-card">
+      <div class="col-header">
+        <div class="col-stripe s-indigo"></div>
+        <div class="col-icon ii">
+          <svg viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="5.2" stroke="#4F46E5" stroke-width="1.1" fill="none"/>
+            <path d="M5 5.5C5 4.1 9 4.1 9 5.8C9 7 7 7.5 7 9" stroke="#4F46E5" stroke-width="1.1" stroke-linecap="round" fill="none"/>
+            <circle cx="7" cy="10.5" r="0.8" fill="#4F46E5"/>
+          </svg>
+        </div>
+        <div class="col-name">Perplexity</div>
+        <div class="col-tag">Cited real-time web research</div>
+      </div>
+      <div class="col-body">
+        <div>
+          <div class="chips">
+            <span class="chip ci">Real-time web</span>
+            <span class="chip ci">Cited links</span>
+            <span class="chip ci">Source-first</span>
+          </div>
+        </div>
+        <div class="col-divider"></div>
+        <div>
+          <div class="section-label li">What it does</div>
+          <div class="body-text">Searches the live web and surfaces cited, linked sources alongside every answer. Far more trustworthy than a basic Google search.</div>
+        </div>
+        <div class="col-divider"></div>
+        <div>
+          <div class="section-label li">When to use</div>
+          <div class="body-text">Use when accuracy and source credibility matter. Neither it nor AlphaSense will fabricate a reference.</div>
+        </div>
+        <div class="example-block eb-indigo" style="margin-top:auto;">
+          <div class="section-label li" style="margin-bottom:4px;">Example</div>
+          <div class="example-text">"What has Ofwat said about ODIs in the last 6 months?" — with direct links to primary sources</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /columns -->
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#2563EB;"></div>Copilot — M365 retrieval</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#059669;"></div>ChatGPT — reasoning</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#7B2D8E;"></div>Claude — build &amp; create</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#D97706;"></div>Gemini / NotebookLM — visuals &amp; grounded AI</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#00B4D8;"></div>AlphaSense — institutional research</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#4F46E5;"></div>Perplexity — real-time cited search</div>
+    </div>
+    <div class="footer-note">Accenture CS&amp;G &nbsp;·&nbsp; Internal use only</div>
+  </div>
+
+</div><!-- /canvas -->
+</div><!-- /shell -->
+
+<!-- Print button -->
+<button id="print-btn" onclick="window.print()">
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="5" width="10" height="6" rx="1.5" stroke="white" stroke-width="1.2" fill="none"/>
+    <path d="M4 5V2.5C4 2.22 4.22 2 4.5 2H9.5C9.78 2 10 2.22 10 2.5V5" stroke="white" stroke-width="1.2" fill="none"/>
+    <rect x="4" y="8" width="6" height="3" rx="0.5" fill="white" opacity="0.9"/>
+    <circle cx="10.5" cy="7" r="0.8" fill="white" opacity="0.7"/>
+  </svg>
+  Save as PDF
+</button>
+
+<style>
+#print-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #1A1A2E;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  transition: background 0.15s, transform 0.1s;
+}
+#print-btn:hover { background: #7B2D8E; }
+#print-btn:active { transform: scale(0.97); }
+
+@media print {
+  @page {
+    size: 1280px 720px;
+    margin: 0;
+  }
+
+  html, body {
+    width: 1280px;
+    height: 720px;
+    background: white !important;
+    display: block !important;
+    overflow: hidden;
+  }
+
+  #print-btn { display: none !important; }
+
+  #shell {
+    width: 1280px !important;
+    height: 720px !important;
+    max-height: none !important;
+    max-width: none !important;
+    position: static !important;
+  }
+
+  #canvas {
+    position: static !important;
+    transform: none !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 1280px !important;
+    height: 720px !important;
+    box-shadow: none !important;
+  }
+}
+</style>
+
+<script>
+  function scaleCanvas() {
+    const shell = document.getElementById('shell');
+    const canvas = document.getElementById('canvas');
+    const scale = Math.min(shell.offsetWidth / 1280, shell.offsetHeight / 720);
+    canvas.style.transform = `scale(${scale})`;
+    canvas.style.left = ((shell.offsetWidth  - 1280 * scale) / 2) + 'px';
+    canvas.style.top  = ((shell.offsetHeight - 720  * scale) / 2) + 'px';
+  }
+  scaleCanvas();
+  window.addEventListener('resize', scaleCanvas);
+</script>
+</body>
+</html>
