@@ -1,0 +1,1555 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Native Library &mdash; CS&amp;G UKI</title>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+<link href="https://api.fontshare.com/v2/css?f[]=switzer@300,400,500,600,700,800,900&f[]=jetbrains-mono@400,500,600&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:         #0A0A0A;
+  --ink-2:       #161618;
+  --ink-3:       #1F1F22;
+  --paper:       #FFFFFF;
+  --paper-2:     #FAFAFA;
+  --paper-3:     #F5F4FC;
+  --tint:        #FAF6FF;
+  --rule:        #E8E8EB;
+  --rule-2:      #D1D5DB;
+  --rule-3:      #C7CBD3;
+  --text:        #111114;
+  --text-2:      #2A2A30;
+  --muted:       #6B7280;
+  --muted-2:     #9CA3AF;
+  --dim:         #B8BCC4;
+  --purple:      #A100FF;
+  --purple-ink:  #7A00BF;
+  --purple-tint: rgba(161, 0, 255, 0.08);
+  --purple-soft: rgba(161, 0, 255, 0.14);
+  --green:       #10B981;
+  --amber:       #F59E0B;
+
+  --sans: "Switzer", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --ease: cubic-bezier(.2,.7,.15,1);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss01", "cv11";
+}
+::selection { background: var(--purple); color: var(--paper); }
+button { font-family: var(--sans); }
+a { color: inherit; text-decoration: none; }
+
+/* ════════════════════════════════════════════════════════════
+   SHARED — brand chrome
+   ════════════════════════════════════════════════════════════ */
+
+.brand-mark {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--sans); font-weight: 600;
+  font-size: 12.5px; letter-spacing: 0.02em;
+  color: var(--text);
+}
+.brand-mark .gt {
+  color: var(--purple); font-weight: 800; font-size: 16px; line-height: 1;
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--purple);
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.eyebrow::before {
+  content: ""; display: inline-block;
+  width: 16px; height: 1px; background: var(--purple);
+}
+
+/* ════════════════════════════════════════════════════════════
+   LANDING VIEW
+   ════════════════════════════════════════════════════════════ */
+
+#landingView { min-height: 100vh; overflow-x: hidden; background: var(--paper); }
+
+/* SharePoint banner — branded amber strip */
+#spBanner {
+  background: #FFF6E0; border-bottom: 1px solid #FBE3A0;
+  padding: 10px clamp(28px, 5vw, 88px);
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+#spBanner.hidden { display: none; }
+.sp-banner-left { display: flex; align-items: center; gap: 10px; }
+.sp-banner-icon { font-size: 14px; flex-shrink: 0; }
+.sp-banner-text { font-size: 12.5px; color: #6B4A0F; line-height: 1.45; }
+.sp-banner-text strong { font-weight: 700; }
+.sp-banner-dismiss {
+  background: none; border: 1px solid #F3CE6A; border-radius: 6px;
+  padding: 4px 10px; font-size: 11px; font-weight: 600; color: #6B4A0F;
+  cursor: pointer; flex-shrink: 0; transition: background .15s;
+}
+.sp-banner-dismiss:hover { background: rgba(243,206,106,0.3); }
+
+/* Nav */
+.l-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule);
+  padding: 0 clamp(28px, 5vw, 88px); height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.l-nav-left { display: flex; flex-direction: column; gap: 4px; }
+.l-nav-eyebrow {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--purple);
+}
+.l-nav-title {
+  font-size: 15px; font-weight: 700; letter-spacing: -0.012em;
+  color: var(--text); line-height: 1;
+}
+.l-nav-cta {
+  background: var(--text); color: var(--paper); border: none; border-radius: 999px;
+  padding: 10px 18px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  transition: background .2s, transform .15s;
+  display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.01em;
+}
+.l-nav-cta:hover { background: var(--purple); transform: translateY(-1px); }
+.l-nav-cta svg { transition: transform .2s; }
+.l-nav-cta:hover svg { transform: translateX(2px); }
+
+/* Hero — light, type-led, subtle purple bloom */
+.l-hero {
+  position: relative;
+  max-width: 1280px; margin: 0 auto;
+  padding: 96px clamp(28px, 5vw, 88px) 80px;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(40px, 6vw, 72px);
+  align-items: center;
+  overflow: hidden;
+}
+.l-hero::before {
+  content: ""; position: absolute; pointer-events: none;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 50% 40% at 92% 18%, rgba(161,0,255,0.10), transparent 60%),
+    radial-gradient(ellipse 40% 30% at 5% 92%, rgba(161,0,255,0.06), transparent 65%);
+  z-index: 0;
+}
+.l-hero::after {
+  content: ""; position: absolute; pointer-events: none;
+  inset: 0;
+  background-image: radial-gradient(rgba(10,10,10,0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.5;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, #000 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, #000 30%, transparent 80%);
+  z-index: 0;
+}
+.l-hero > * { position: relative; z-index: 1; }
+
+.l-hero-eyebrow { margin-bottom: 20px; }
+.l-hero-h1 {
+  font-size: clamp(40px, 6.4vw, 78px);
+  font-weight: 700;
+  letter-spacing: -0.038em;
+  line-height: 0.96;
+  color: var(--text);
+  margin-bottom: 22px;
+}
+.l-hero-h1 em { font-style: normal; color: var(--purple); }
+.l-hero-h1 .cursor {
+  display: inline-block;
+  width: 5px;
+  height: 0.78em;
+  background: var(--purple);
+  margin-left: 12px;
+  vertical-align: -0.04em;
+  animation: blink 1.1s steps(1) infinite;
+  box-shadow: 0 0 14px rgba(161,0,255,0.35);
+}
+@keyframes blink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.l-hero-sub {
+  font-size: clamp(15px, 1.2vw, 18px);
+  line-height: 1.6; color: var(--muted);
+  margin-bottom: 32px; max-width: 50ch;
+}
+.l-hero-sub b { color: var(--text); font-weight: 500; }
+
+.l-hero-stats { display: flex; gap: clamp(24px, 3vw, 48px); margin-bottom: 30px; }
+.l-hero-stat-n {
+  font-family: var(--mono); font-size: clamp(28px, 3.2vw, 40px);
+  font-weight: 500; color: var(--text); line-height: 1; letter-spacing: -0.04em;
+}
+.l-hero-stat-n.pr { color: var(--purple); }
+.l-hero-stat-l {
+  font-size: 10.5px; color: var(--muted); margin-top: 6px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase; font-family: var(--mono);
+}
+
+.l-cta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.l-hero-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--purple); color: var(--paper); border: none; border-radius: 999px;
+  padding: 15px 26px; font-size: 14px; font-weight: 600; cursor: pointer;
+  letter-spacing: 0.005em;
+  transition: background .15s, transform .15s, box-shadow .2s;
+  animation: ctaPulse 3s ease-in-out 1.5s infinite;
+  box-shadow: 0 4px 16px rgba(161,0,255,0.18);
+}
+.l-hero-cta:hover {
+  background: var(--purple-ink); transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(161,0,255,0.4); animation: none;
+}
+.l-hero-cta-ghost {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: transparent; color: var(--text); border: 1px solid var(--rule-2);
+  border-radius: 999px; padding: 14px 22px; font-size: 13.5px; font-weight: 500;
+  cursor: pointer; letter-spacing: 0.005em;
+  transition: border-color .15s, color .15s, transform .15s;
+}
+.l-hero-cta-ghost:hover { border-color: var(--purple); color: var(--purple); transform: translateY(-1px); }
+
+@keyframes ctaPulse {
+  0%, 100% { box-shadow: 0 4px 16px rgba(161,0,255,0.18), 0 0 0 0 rgba(161,0,255,0.3); }
+  50%      { box-shadow: 0 4px 16px rgba(161,0,255,0.18), 0 0 0 12px rgba(161,0,255,0); }
+}
+.l-hero-scroll {
+  font-size: 11px; color: var(--muted-2); margin-top: 18px; cursor: pointer;
+  display: inline-block; font-family: var(--mono); letter-spacing: 0.06em;
+}
+.l-hero-scroll:hover { color: var(--text); }
+
+/* Live mini-search widget */
+.l-widget {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 18px;
+  box-shadow: 0 14px 60px rgba(10,10,10,0.08), 0 2px 6px rgba(10,10,10,0.04);
+  overflow: hidden;
+  animation: fadeUp 0.6s var(--ease) 0.2s both;
+}
+.l-widget-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--rule);
+}
+.l-search-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.l-search-wrap { position: relative; flex: 1; }
+.l-search-wrap svg {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  opacity: 0.4; pointer-events: none;
+}
+#landingSearch {
+  width: 100%;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 11px 14px 11px 36px;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s, background .15s;
+}
+#landingSearch:focus { border-color: var(--purple); background: var(--paper); }
+#landingSearch::placeholder { color: var(--muted-2); }
+.l-surprise {
+  background: transparent; border: 1px solid var(--rule);
+  border-radius: 10px; padding: 9px 13px;
+  font-size: 11px; font-weight: 600; color: var(--muted);
+  cursor: pointer; transition: all .15s; white-space: nowrap; flex-shrink: 0;
+  display: flex; align-items: center; gap: 5px;
+}
+.l-surprise:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-tint); }
+.l-mini-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.l-chip {
+  padding: 4px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 600;
+  cursor: pointer; border: 1px solid var(--rule); background: var(--paper-2);
+  color: var(--muted); transition: all .12s; letter-spacing: 0.02em;
+  font-family: var(--sans);
+}
+.l-chip:hover { border-color: var(--rule-2); color: var(--text); }
+.l-chip.active { color: var(--paper); background: var(--purple); border-color: var(--purple); }
+
+.l-widget-results { max-height: 320px; overflow-y: auto; padding: 8px 0; }
+.l-widget-results::-webkit-scrollbar { width: 3px; }
+.l-widget-results::-webkit-scrollbar-thumb { background: var(--rule-2); border-radius: 3px; }
+
+.l-result {
+  display: flex; align-items: center; gap: 12px; padding: 11px 20px;
+  cursor: pointer; transition: background .12s;
+  animation: fadeUp 0.2s ease both;
+  border-left: 2px solid transparent;
+}
+.l-result:hover { background: var(--paper-2); border-left-color: var(--purple); }
+.l-result-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: var(--purple); }
+.l-result-info { flex: 1; min-width: 0; }
+.l-result-title {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  line-height: 1.3; letter-spacing: -0.008em;
+}
+.l-result-topic { font-size: 10.5px; color: var(--muted); margin-top: 2px; font-family: var(--mono); letter-spacing: 0.04em; }
+.l-result-badge {
+  font-family: var(--mono); font-size: 8.5px; font-weight: 700;
+  padding: 2px 6px; border-radius: 3px; flex-shrink: 0;
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.l-result-badge.built    { background: var(--purple-soft); color: var(--purple-ink); }
+.l-result-badge.template { background: rgba(10,10,10,0.07); color: var(--text-2); }
+.l-result-arrow { font-size: 12px; color: var(--muted-2); flex-shrink: 0; }
+
+.l-widget-footer {
+  padding: 12px 20px; border-top: 1px solid var(--rule);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.l-widget-count { font-size: 10.5px; color: var(--muted-2); font-weight: 500; font-family: var(--mono); letter-spacing: 0.04em; }
+.l-widget-count span { font-size: 12.5px; color: var(--purple); font-weight: 600; }
+.l-widget-link {
+  font-size: 11.5px; font-weight: 600; color: var(--purple); cursor: pointer;
+  display: flex; align-items: center; gap: 4px; transition: gap .15s;
+}
+.l-widget-link:hover { gap: 8px; }
+
+/* Topics section */
+.l-topics {
+  background: var(--paper-2);
+  border-top: 1px solid var(--rule);
+  padding: clamp(64px, 9vh, 96px) clamp(28px, 5vw, 88px);
+}
+.l-section-head { text-align: center; margin-bottom: 56px; }
+.l-section-eyebrow {
+  font-family: var(--mono); font-size: 10.5px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--purple);
+  margin-bottom: 14px; display: block;
+}
+.l-section-h2 {
+  font-size: clamp(32px, 4.4vw, 52px);
+  font-weight: 700; letter-spacing: -0.032em;
+  color: var(--text); line-height: 1.05;
+}
+.l-section-h2 span { color: var(--purple); }
+.l-section-sub {
+  font-size: 15px; color: var(--muted); margin-top: 14px; line-height: 1.6;
+  max-width: 56ch; margin-left: auto; margin-right: auto;
+}
+
+.l-topic-grid {
+  max-width: 1120px; margin: 0 auto 24px;
+  display: grid; grid-template-columns: repeat(8, 1fr); gap: 1px;
+  background: var(--rule); border: 1px solid var(--rule);
+}
+.l-topic-tile {
+  background: var(--paper); padding: 22px 18px; cursor: pointer;
+  transition: background .25s var(--ease), transform .15s;
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.l-topic-tile:hover { background: var(--paper-3); }
+.l-topic-tile.built-tile { background: var(--purple); color: var(--paper); }
+.l-topic-tile.built-tile:hover { background: var(--purple-ink); }
+.l-topic-tile.built-tile .l-tile-count,
+.l-topic-tile.built-tile .l-tile-name { color: var(--paper); }
+.l-topic-tile.built-tile .l-tile-label { color: rgba(255,255,255,0.7); }
+
+.l-tile-count {
+  font-family: var(--mono); font-size: 28px; font-weight: 500;
+  line-height: 1; letter-spacing: -0.04em; color: var(--text);
+}
+.l-tile-name {
+  font-size: 12.5px; font-weight: 700; color: var(--text);
+  letter-spacing: -0.005em; line-height: 1.2;
+}
+.l-tile-label {
+  font-family: var(--mono); font-size: 9.5px; color: var(--muted);
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+.l-built-strip {
+  max-width: 1120px; margin: 0 auto;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--purple);
+  border-radius: 8px;
+  padding: 18px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+}
+.l-built-title { font-size: 13.5px; font-weight: 700; color: var(--purple); margin-bottom: 4px; letter-spacing: -0.005em; }
+.l-built-sub { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.l-built-link {
+  font-size: 12.5px; font-weight: 700; color: var(--purple); cursor: pointer; white-space: nowrap;
+  display: flex; align-items: center; gap: 5px; transition: gap .15s;
+}
+.l-built-link:hover { gap: 8px; }
+
+/* How it works */
+.l-how {
+  padding: clamp(64px, 9vh, 96px) clamp(28px, 5vw, 88px);
+  max-width: 1280px; margin: 0 auto;
+}
+.l-how-head { margin-bottom: 48px; }
+.l-how-head .l-section-h2 { max-width: 18ch; }
+.l-how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+.l-how-card { background: var(--paper); padding: 32px 28px; }
+.l-how-step {
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--purple); margin-bottom: 14px;
+}
+.l-how-title {
+  font-size: 18px; font-weight: 700; color: var(--text);
+  margin-bottom: 10px; letter-spacing: -0.012em; line-height: 1.2;
+}
+.l-how-desc { font-size: 13.5px; color: var(--muted); line-height: 1.65; }
+.l-how-hint {
+  font-size: 12px; color: var(--muted); margin-top: 14px;
+  padding: 10px 12px; background: var(--paper-2); border-radius: 6px;
+  border: 1px solid var(--rule);
+}
+.l-how-hint code { font-family: var(--mono); color: var(--purple); font-size: 11.5px; }
+
+/* Landing footer */
+.l-footer {
+  background: var(--ink);
+  padding: 28px clamp(28px, 5vw, 88px);
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--ink-3);
+}
+.l-footer-left {
+  font-size: 11.5px; color: rgba(255,255,255,0.55); font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.l-footer-left b { color: var(--purple); font-weight: 600; }
+.l-footer-right { font-size: 11.5px; color: rgba(255,255,255,0.4); }
+
+/* ════════════════════════════════════════════════════════════
+   EXPLORER VIEW
+   ════════════════════════════════════════════════════════════ */
+
+#explorerView {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 100;
+  visibility: hidden; opacity: 0;
+  transition: opacity .25s ease;
+  background: var(--paper-2);
+  display: flex; flex-direction: column;
+}
+#explorerView.visible { visibility: visible; opacity: 1; }
+
+/* Explorer header — dark, brand strip below */
+.e-header {
+  background: var(--ink);
+  padding: 0 clamp(20px, 3vw, 32px);
+  height: 64px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  position: relative;
+}
+.e-header::after {
+  content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--purple), rgba(161,0,255,0.5) 60%, transparent);
+}
+.e-header-left { display: flex; align-items: center; gap: 18px; }
+.e-back {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px; padding: 7px 14px;
+  font-family: var(--sans); font-size: 11.5px; font-weight: 600;
+  color: rgba(255,255,255,0.75); cursor: pointer; transition: all .15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.e-back:hover { background: rgba(161,0,255,0.18); border-color: var(--purple); color: var(--paper); }
+.e-header-eyebrow {
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--purple);
+}
+.e-header-title {
+  font-size: 15px; font-weight: 700; letter-spacing: -0.012em;
+  color: var(--paper); line-height: 1.1; margin-top: 3px;
+}
+.e-header-stats { display: flex; gap: 24px; }
+.e-stat { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.e-stat-n {
+  font-family: var(--mono); font-size: 17px; font-weight: 500;
+  color: var(--paper); line-height: 1; letter-spacing: -0.03em;
+}
+.e-stat-l {
+  font-family: var(--mono); font-size: 8.5px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+}
+
+/* Explorer toolbar */
+.e-toolbar {
+  background: var(--paper); border-bottom: 1px solid var(--rule);
+  padding: 12px clamp(20px, 3vw, 32px);
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0; flex-wrap: wrap;
+}
+.e-search-wrap { position: relative; flex: 0 0 300px; }
+.e-search-wrap svg {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  opacity: 0.4; pointer-events: none;
+}
+#explorerSearch {
+  width: 100%;
+  background: var(--paper-2); border: 1px solid var(--rule); border-radius: 999px;
+  padding: 9px 14px 9px 36px;
+  font-family: var(--sans); font-size: 12.5px; color: var(--text);
+  outline: none; transition: border-color .15s, background .15s;
+}
+#explorerSearch:focus { border-color: var(--purple); background: var(--paper); }
+#explorerSearch::placeholder { color: var(--muted-2); }
+
+.e-surprise {
+  background: transparent; border: 1px solid var(--rule); border-radius: 999px;
+  padding: 8px 13px; font-size: 11.5px; font-weight: 600;
+  color: var(--muted); cursor: pointer; transition: all .15s; white-space: nowrap;
+  display: flex; align-items: center; gap: 6px; font-family: var(--sans);
+}
+.e-surprise:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-tint); }
+
+.e-divider { width: 1px; height: 24px; background: var(--rule); flex-shrink: 0; }
+.e-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.e-chip {
+  padding: 5px 12px; border-radius: 999px; font-size: 11px; font-weight: 600;
+  cursor: pointer; border: 1px solid var(--rule); background: var(--paper-2);
+  color: var(--muted); transition: all .12s; letter-spacing: 0.02em;
+  font-family: var(--sans);
+}
+.e-chip:hover { color: var(--text); border-color: var(--rule-2); }
+.e-chip.active { color: var(--paper); background: var(--purple); border-color: var(--purple); }
+
+/* Card grid */
+.e-grid-wrap {
+  flex: 1; overflow-y: auto;
+  padding: 20px clamp(20px, 3vw, 32px) 40px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.e-grid-wrap::-webkit-scrollbar { width: 6px; }
+.e-grid-wrap::-webkit-scrollbar-track { background: transparent; }
+.e-grid-wrap::-webkit-scrollbar-thumb { background: var(--rule-2); border-radius: 6px; }
+
+.e-count-bar {
+  font-family: var(--mono); font-size: 10.5px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted); flex-shrink: 0;
+}
+.e-count-bar span {
+  font-size: 13px; color: var(--purple); font-weight: 600;
+  letter-spacing: -0.02em; margin-right: 4px;
+}
+.e-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+.e-card {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 18px 20px;
+  cursor: pointer; position: relative;
+  transition: border-color .15s, box-shadow .15s, transform .1s;
+  animation: fadeUp .3s ease both;
+  display: flex; flex-direction: column; gap: 10px;
+  overflow: hidden;
+}
+.e-card::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; background: transparent; transition: background .2s;
+}
+.e-card:hover {
+  border-color: var(--rule-2);
+  box-shadow: 0 6px 20px rgba(10,10,10,0.07);
+  transform: translateY(-2px);
+}
+.e-card:hover::before { background: var(--purple); }
+.e-card.active {
+  border-color: var(--purple) !important;
+  box-shadow: 0 0 0 3px var(--purple-soft), 0 6px 20px rgba(161,0,255,0.12);
+}
+.e-card.active::before { background: var(--purple); }
+.e-card.built::before { background: var(--purple); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.e-card-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.e-card-topic {
+  font-family: var(--mono); font-size: 9.5px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--purple);
+}
+.e-card-badge {
+  font-family: var(--mono); font-size: 8.5px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 7px; border-radius: 4px; flex-shrink: 0;
+}
+.e-card-badge.built    { background: var(--purple); color: var(--paper); }
+.e-card-badge.template { background: rgba(10,10,10,0.07); color: var(--text-2); }
+.e-card-title {
+  font-size: 14px; font-weight: 700; color: var(--text);
+  line-height: 1.32; letter-spacing: -0.012em;
+}
+.e-card-desc {
+  font-size: 12px; color: var(--muted); line-height: 1.6;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.e-card-foot {
+  margin-top: auto; padding-top: 10px;
+  border-top: 1px solid var(--rule);
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--mono); font-size: 9.5px; color: var(--muted);
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.e-card-foot .open {
+  color: var(--purple); font-weight: 600;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.e-card-foot .open::after { content: "→"; transition: transform .2s; }
+.e-card:hover .e-card-foot .open::after { transform: translateX(3px); }
+
+.e-empty {
+  grid-column: 1/-1;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 80px 20px; gap: 12px;
+}
+.e-empty-icon { font-size: 36px; opacity: 0.3; }
+.e-empty-text { font-size: 14px; font-weight: 600; color: var(--muted); }
+.e-empty-sub { font-size: 12px; color: var(--muted-2); }
+
+/* ════════════════════════════════════════════════════════════
+   DRAWER (detail view)
+   ════════════════════════════════════════════════════════════ */
+
+.drawer-backdrop {
+  position: fixed; inset: 0; background: rgba(10,10,10,0.4); z-index: 200;
+  backdrop-filter: blur(2px);
+  opacity: 0; pointer-events: none; transition: opacity .25s;
+}
+.drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0;
+  width: min(560px, 92vw);
+  background: var(--paper); border-left: 1px solid var(--rule);
+  z-index: 201;
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .35s cubic-bezier(0.22,1,0.36,1);
+  box-shadow: -20px 0 60px rgba(10,10,10,0.12);
+}
+.drawer.open { transform: translateX(0); }
+
+.drawer-header {
+  padding: 22px 28px 18px;
+  border-bottom: 1px solid var(--rule);
+  flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 14px;
+  background: linear-gradient(180deg, var(--tint), var(--paper));
+}
+.drawer-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.drawer-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.drawer-topic {
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--purple);
+}
+.drawer-source {
+  font-family: var(--mono); font-size: 9px; font-weight: 700;
+  letter-spacing: 0.12em; padding: 3px 8px; border-radius: 4px;
+  text-transform: uppercase;
+}
+.drawer-source.built    { background: var(--purple); color: var(--paper); }
+.drawer-source.template { background: rgba(10,10,10,0.07); color: var(--text-2); }
+.drawer-title {
+  font-size: 22px; font-weight: 700; color: var(--text);
+  letter-spacing: -0.022em; line-height: 1.2;
+}
+.close-btn {
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 999px;
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; color: var(--muted);
+  transition: all .15s; font-size: 16px; line-height: 1;
+}
+.close-btn:hover { background: var(--purple); border-color: var(--purple); color: var(--paper); }
+
+.drawer-body { flex: 1; overflow-y: auto; padding: 24px 28px; }
+.drawer-body::-webkit-scrollbar { width: 6px; }
+.drawer-body::-webkit-scrollbar-thumb { background: var(--rule-2); border-radius: 6px; }
+
+/* Quick-look summary card at top of drawer */
+.drawer-summary {
+  background: var(--tint);
+  border: 1px solid var(--purple-soft);
+  border-left: 3px solid var(--purple);
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 24px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.drawer-summary .label {
+  font-family: var(--mono); font-size: 9.5px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--purple);
+}
+.drawer-summary .text {
+  font-size: 13.5px; color: var(--text); line-height: 1.55; font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+.drawer-section { margin-bottom: 24px; }
+.drawer-section-label {
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--purple);
+  margin-bottom: 10px;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.drawer-section-label::before {
+  content: ""; display: inline-block;
+  width: 14px; height: 1px; background: var(--purple);
+}
+.drawer-section-text {
+  font-size: 13.5px; color: var(--text-2); line-height: 1.7;
+  white-space: pre-wrap;
+}
+.drawer-section-text strong { color: var(--text); font-weight: 600; }
+
+.drawer-divider { height: 1px; background: var(--rule); margin: 22px 0; }
+
+.prompt-block {
+  background: var(--ink);
+  border: 1px solid var(--ink-3);
+  border-radius: 10px;
+  padding: 20px 22px;
+  font-family: var(--mono); font-size: 11.5px;
+  color: #E8E8EC; line-height: 1.75;
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 380px; overflow-y: auto;
+  position: relative;
+}
+.prompt-block::-webkit-scrollbar { width: 6px; }
+.prompt-block::-webkit-scrollbar-thumb { background: var(--ink-3); border-radius: 6px; }
+.prompt-block::before {
+  content: "PROMPT";
+  position: absolute; top: 12px; right: 14px;
+  font-family: var(--mono); font-size: 8.5px; font-weight: 700;
+  letter-spacing: 0.18em; color: var(--purple);
+  background: rgba(161,0,255,0.12); padding: 3px 7px; border-radius: 3px;
+}
+
+.drawer-footer {
+  padding: 18px 28px; border-top: 1px solid var(--rule); flex-shrink: 0;
+  background: var(--paper);
+}
+.copy-btn {
+  width: 100%; background: var(--purple); border: none; border-radius: 10px;
+  padding: 14px; font-family: var(--sans); font-size: 13.5px; font-weight: 600;
+  color: var(--paper); cursor: pointer; transition: all .2s; letter-spacing: 0.005em;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.copy-btn:hover { background: var(--purple-ink); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(161,0,255,0.35); }
+.copy-btn.copied { background: var(--green) !important; transform: none !important; box-shadow: none !important; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ════════════════════════════════════════════════════════════
+   RICH DETAIL BLOCKS (drawer, optional per use case)
+   ════════════════════════════════════════════════════════════ */
+
+.drawer-details { display: flex; flex-direction: column; gap: 18px; }
+
+.d-heading {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.014em;
+  color: var(--text);
+  margin: 12px 0 -4px;
+  display: flex; align-items: center; gap: 10px;
+  line-height: 1.2;
+}
+.d-heading::before {
+  content: ""; display: inline-block;
+  width: 14px; height: 2px; background: var(--purple); flex-shrink: 0;
+}
+
+.d-paragraph {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--text-2);
+}
+.d-paragraph strong { color: var(--text); font-weight: 600; }
+.d-paragraph a {
+  color: var(--purple); text-decoration: underline;
+  text-decoration-thickness: 1px; text-underline-offset: 2px;
+}
+
+.d-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.d-stats > div {
+  background: var(--tint);
+  padding: 16px 14px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.d-stats .v {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  color: var(--purple);
+  line-height: 1;
+}
+.d-stats .k {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.d-bullets {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.d-bullets li {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-2);
+  padding-left: 18px;
+  position: relative;
+}
+.d-bullets li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 8px;
+  width: 5px; height: 5px;
+  background: var(--purple);
+  border-radius: 99px;
+  box-shadow: 0 0 6px rgba(161,0,255,0.4);
+}
+.d-bullets li strong {
+  color: var(--text); font-weight: 700; margin-right: 4px;
+  display: inline;
+}
+.d-bullets li a { color: var(--purple); }
+
+.d-callout {
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-2);
+  border-left: 3px solid var(--purple);
+  background: var(--tint);
+  border-top: 1px solid var(--purple-soft);
+  border-right: 1px solid var(--purple-soft);
+  border-bottom: 1px solid var(--purple-soft);
+}
+.d-callout strong { color: var(--text); font-weight: 600; }
+.d-callout.amber {
+  background: #FFF7E6;
+  border-left-color: var(--amber);
+  border-top-color: rgba(245,158,11,0.22);
+  border-right-color: rgba(245,158,11,0.22);
+  border-bottom-color: rgba(245,158,11,0.22);
+}
+.d-callout.green {
+  background: #ECFDF5;
+  border-left-color: var(--green);
+  border-top-color: rgba(16,185,129,0.22);
+  border-right-color: rgba(16,185,129,0.22);
+  border-bottom-color: rgba(16,185,129,0.22);
+}
+.d-callout.teal {
+  background: #ECFEFF;
+  border-left-color: #06B6D4;
+  border-top-color: rgba(6,182,212,0.22);
+  border-right-color: rgba(6,182,212,0.22);
+  border-bottom-color: rgba(6,182,212,0.22);
+}
+
+.d-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.d-card {
+  background: var(--paper);
+  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+.d-card-n {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple);
+  background: var(--purple-tint);
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+.d-card-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.d-card-t {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.008em;
+  line-height: 1.35;
+}
+.d-card-b {
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+.d-card-b strong { color: var(--text-2); font-weight: 600; }
+.d-card-b a { color: var(--purple); }
+
+.d-links {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.d-link {
+  background: var(--paper);
+  padding: 11px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text-2);
+  letter-spacing: 0.005em;
+  transition: all .15s;
+  text-decoration: none;
+}
+.d-link:hover { background: var(--tint); color: var(--purple); }
+.d-link span { color: var(--purple); font-weight: 600; transition: transform .2s; }
+.d-link:hover span { transform: translateX(3px); }
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .l-hero { grid-template-columns: 1fr; }
+  .l-topic-grid { grid-template-columns: repeat(4, 1fr); }
+  .e-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 720px) {
+  .l-topic-grid { grid-template-columns: repeat(2, 1fr); }
+  .l-how-grid { grid-template-columns: 1fr; }
+  .l-built-strip { flex-direction: column; align-items: flex-start; }
+  .e-grid { grid-template-columns: 1fr; }
+  .e-search-wrap { flex: 1 1 100%; }
+  .e-header { padding: 0 16px; }
+  .e-header-stats { gap: 14px; }
+  .drawer { width: 100%; }
+  .d-stats { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     LANDING VIEW
+     ══════════════════════════════════════════════════════ -->
+<div id="landingView">
+
+  <!-- SharePoint banner -->
+  <div id="spBanner">
+    <div class="sp-banner-left">
+      <span class="sp-banner-icon">&#9888;&#xFE0F;</span>
+      <span class="sp-banner-text"><strong>Viewing via SharePoint?</strong> &nbsp;Download the file and open it locally in your browser &mdash; some features won&rsquo;t work in the SharePoint preview.</span>
+    </div>
+    <button class="sp-banner-dismiss" onclick="document.getElementById('spBanner').classList.add('hidden')">Got it</button>
+  </div>
+
+  <!-- Nav -->
+  <nav class="l-nav">
+    <div class="l-nav-left">
+      <span class="l-nav-eyebrow">&gt; AI Native &middot; CS&amp;G UKI</span>
+      <span class="l-nav-title">The Library</span>
+    </div>
+    <button class="l-nav-cta" onclick="showExplorer()">
+      Explore the library
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </nav>
+
+  <!-- Hero -->
+  <section class="l-hero">
+    <div>
+      <div class="l-hero-eyebrow eyebrow">AI Native &middot; The Library</div>
+      <h1 class="l-hero-h1">
+        <em id="heroCount">38</em> AI use cases.<br/>
+        One library.<span class="cursor" aria-hidden="true"></span>
+      </h1>
+      <p class="l-hero-sub">
+        Search, filter, and copy &mdash; <b>prompts and patterns the practice has built or stress-tested</b> for research, delivery, creative work and proposal prep. Owned by CS&amp;G UKI, growing by reps not by planning.
+      </p>
+      <div class="l-hero-stats">
+        <div>
+          <div class="l-hero-stat-n" id="statTotal">38</div>
+          <div class="l-hero-stat-l">Use cases</div>
+        </div>
+        <div>
+          <div class="l-hero-stat-n" id="statTopics">7</div>
+          <div class="l-hero-stat-l">Topics</div>
+        </div>
+        <div>
+          <div class="l-hero-stat-n pr" id="statBuilt">7</div>
+          <div class="l-hero-stat-l">Built by us</div>
+        </div>
+      </div>
+      <div class="l-cta-row">
+        <button class="l-hero-cta" onclick="showExplorer()">
+          Explore the library
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <button class="l-hero-cta-ghost" onclick="landingSurprise()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Surprise me
+        </button>
+      </div>
+      <div class="l-hero-scroll" onclick="document.getElementById('topics-section').scrollIntoView({behavior:'smooth'})">&darr; &nbsp;See what&rsquo;s inside</div>
+    </div>
+
+    <!-- Live mini-search widget -->
+    <div class="l-widget">
+      <div class="l-widget-header">
+        <div class="l-search-row">
+          <div class="l-search-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" id="landingSearch" placeholder="Try: email, deploy, competitor, AlphaSense..." autocomplete="off" spellcheck="false">
+          </div>
+          <button class="l-surprise" onclick="landingSurprise()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Random
+          </button>
+        </div>
+        <div class="l-mini-chips" id="landingChips"></div>
+      </div>
+      <div class="l-widget-results" id="landingResults"></div>
+      <div class="l-widget-footer">
+        <div class="l-widget-count"><span id="landingResultCount">38</span> results</div>
+        <div class="l-widget-link" onclick="showExplorer()">See all in explorer &nbsp;&rsaquo;</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Topics -->
+  <section class="l-topics" id="topics-section">
+    <div class="l-section-head">
+      <span class="l-section-eyebrow">What&rsquo;s inside</span>
+      <h2 class="l-section-h2">Everything the practice needs<br/>to <span>work with AI</span></h2>
+      <p class="l-section-sub">Seven topics, one library. Click any topic to jump straight to it in the explorer.</p>
+    </div>
+    <div class="l-topic-grid" id="topicGrid"></div>
+    <div class="l-built-strip">
+      <div>
+        <div class="l-built-title">&gt; Built by the Practice</div>
+        <div class="l-built-sub">Seven patterns the CS&amp;G UKI practice has already shipped &mdash; HTML prompts, AlphaSense, image editing, style guides, role-based site generator, Claude Code notes, Apple-style teaser videos.</div>
+      </div>
+      <div class="l-built-link" onclick="showExplorer('Built by the Practice')">
+        See all <span>&rsaquo;</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="l-how">
+    <div class="l-how-head">
+      <span class="l-section-eyebrow">How to use it</span>
+      <h2 class="l-section-h2">Three steps.<br/><span>That&rsquo;s it.</span></h2>
+    </div>
+    <div class="l-how-grid">
+      <div class="l-how-card">
+        <div class="l-how-step">Step 01</div>
+        <div class="l-how-title">Search for what you need</div>
+        <div class="l-how-desc">Type anything &mdash; a task, a tool, an outcome. Search runs across titles, descriptions and the full prompt text, so you&rsquo;ll find it even if you don&rsquo;t know what it&rsquo;s called.</div>
+        <div class="l-how-hint">Try: <code>"email"</code>, <code>"AlphaSense"</code>, <code>"competitor"</code>, <code>"JSON"</code></div>
+      </div>
+      <div class="l-how-card">
+        <div class="l-how-step">Step 02</div>
+        <div class="l-how-title">Filter by topic</div>
+        <div class="l-how-desc">Use the topic chips to narrow to Built by us, Research, Creative, Development and more. Combine with search to find what sits at the intersection.</div>
+        <div class="l-how-hint">Or click any topic tile above to jump straight there.</div>
+      </div>
+      <div class="l-how-card">
+        <div class="l-how-step">Step 03</div>
+        <div class="l-how-title">Open, read, copy</div>
+        <div class="l-how-desc">Click any card for the full write-up &mdash; summary at the top, what it is, when to use, complete prompt. One button copies the prompt to your clipboard.</div>
+        <div class="l-how-hint">Feeling lucky? Hit <code>Surprise me</code> for a random pick.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="l-footer">
+    <div class="l-footer-left">&gt; AI Native &middot; <b>Enabling CS&amp;G for the New</b></div>
+    <div class="l-footer-right">Built by the practice, for the practice.</div>
+  </footer>
+
+</div><!-- /#landingView -->
+
+
+<!-- ══════════════════════════════════════════════════════
+     EXPLORER VIEW
+     ══════════════════════════════════════════════════════ -->
+<div id="explorerView">
+  <div class="e-header">
+    <div class="e-header-left">
+      <button class="e-back" onclick="showLanding()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Overview
+      </button>
+      <div>
+        <div class="e-header-eyebrow">&gt; AI Native &middot; CS&amp;G UKI</div>
+        <div class="e-header-title">The Library &mdash; Explorer</div>
+      </div>
+    </div>
+    <div class="e-header-stats">
+      <div class="e-stat"><span class="e-stat-n" id="explorerVisibleCount">38</span><span class="e-stat-l">Showing</span></div>
+      <div class="e-stat"><span class="e-stat-n">38</span><span class="e-stat-l">Total</span></div>
+    </div>
+  </div>
+  <div class="e-toolbar">
+    <div class="e-search-wrap">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="explorerSearch" placeholder="Search use cases..." autocomplete="off" spellcheck="false">
+    </div>
+    <button class="e-surprise" onclick="explorerSurprise()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Surprise me
+    </button>
+    <div class="e-divider"></div>
+    <div class="e-chips" id="chipContainer"></div>
+  </div>
+  <div class="e-grid-wrap">
+    <div class="e-count-bar"><span id="explorerVisibleCount2">38</span> use cases visible</div>
+    <div class="e-grid" id="cardGrid"></div>
+  </div>
+</div><!-- /#explorerView -->
+
+<!-- Shared drawer -->
+<div class="drawer-backdrop" id="backdrop" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-top">
+      <div class="drawer-meta" id="drawerMeta"></div>
+      <button class="close-btn" onclick="closeDrawer()">&#215;</button>
+    </div>
+    <div class="drawer-title" id="drawerTitle"></div>
+  </div>
+  <div class="drawer-body">
+    <!-- Summary (the easy view) -->
+    <div class="drawer-summary" id="drawerSummaryWrap">
+      <div class="label">At a glance</div>
+      <div class="text" id="drawerSummary"></div>
+    </div>
+
+    <!-- What it is -->
+    <div class="drawer-section">
+      <div class="drawer-section-label">What it is</div>
+      <div class="drawer-section-text" id="drawerWhat"></div>
+    </div>
+
+    <!-- When to use -->
+    <div class="drawer-section">
+      <div class="drawer-section-label">When to use it</div>
+      <div class="drawer-section-text" id="drawerWhen"></div>
+    </div>
+
+    <!-- Rich details (optional, only for use cases that need it) -->
+    <div class="drawer-details-wrap" id="drawerDetailsWrap" hidden>
+      <div class="drawer-divider"></div>
+      <div class="drawer-section-label" style="margin-bottom: 16px;">Detail</div>
+      <div class="drawer-details" id="drawerDetails"></div>
+    </div>
+
+    <div class="drawer-divider"></div>
+
+    <!-- Full prompt / playbook -->
+    <div class="drawer-section">
+      <div class="drawer-section-label">Prompt &middot; playbook</div>
+      <div class="prompt-block" id="drawerPrompt"></div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Copy prompt
+    </button>
+  </div>
+</div>
+
+<script>
+const USE_CASES = [{"id":"accenture-html-artefacts","title":"Accenture Styled HTML Artefact Prompt","topic":"Built by the Practice","source":"built","what":"A reusable prompt template for generating self-contained HTML artefacts styled to the Accenture 1 design system. Paste it into Claude (or any capable LLM) and replace the placeholder with a description of your content. The output is a single `.html` file that renders correctly when opened directly in a browser — no build steps, no dependencies, no server required.","when":"- You need a client-ready or internal HTML deliverable quickly — dashboards, trackers, data summaries, report outputs, or status pages\n- You want consistent visual styling across multiple artefacts without maintaining a shared CSS file\n- You are building standalone tools for stakeholders who will open the file directly (e.g. emailed or shared via SharePoint)\n- You want outputs that look like strategy deliverables, not generic web pages","prompt":"```\nBuild a self-contained HTML file using the design system below. All CSS must be \ninline in a <style> block. No external dependencies except Google Fonts. \nThe file must render correctly when opened directly in a browser.\n\n[DESCRIBE YOUR CONTENT HERE — e.g. a project status dashboard, a data summary, \na report output, a tracker]\n\n---\nDESIGN SYSTEM — ACCENTURE 1\n\nColours\n- Dark navy #1A1A2E — headers, sidebars, nav, table header rows\n- Primary purple #7B2D8E — active states, buttons, interactive elements, callout borders\n- Accent teal #00B4D8 — secondary highlights\n- Purple tint #F5F0F8 — card backgrounds, callout fills\n- Teal tint #E0F7FA — secondary card backgrounds\n- Amber tint #FFFBEB — warning callout fills\n- Green #10B981 — positive indicators\n- Amber #F59E0B — warnings\n- Red #EF4444 — risk indicators\n- White #fff — card surfaces\n- Border grey #E5E7EB — card and component borders\n\nTypography\n- Primary font: Inter (load from Google Fonts), weights 400/600/800\n- Data and numbers: JetBrains Mono (load from Google Fonts)\n- Headlines: weight 800, letter-spacing -0.5px\n- Labels: uppercase, letter-spacing 2px, weight 600\n\nLayout\n- Max content width 1200px, centred\n- Section padding 36px 64px\n- Generous whitespace\n- No decorative elements — hierarchy and colour do the visual work\n\nComponents\n- Cards: white background, 1px #E5E7EB border, 12px border-radius, no default shadow\n- Callout strips: 4px left border in brand colour + matching tint background\n- Tables: #1A1A2E header row with white text, alternating light grey rows\n- Buttons: purple #7B2D8E, white text, rounded corners matching card radius\n- All numerical values rendered in JetBrains Mono\n\nRules\n- No gradients except on progress bars\n- No drop shadows except subtle ones on hover (border shifts to #7B2D8E on card hover)\n- Professional and data-forward — strategy deliverable, not a consumer app\n- Adapt layout to suit the content; palette and components are fixed\n```"},{"id":"ai-image-editing-prompts","title":"AI Image Editing — The 2 Prompts","topic":"Built by the Practice","source":"built","what":"Use these with ChatGPT (GPT-4o) or Gemini. Works with any image.\n\n### What you need\n- A image you want to edit (JPG, PNG, WEBP)\n- A free or paid account on **ChatGPT** (chatgpt.com) or **Gemini** (gemini.google.com)\n- Both prompts below — copy and paste them as instructed","when":"Use Prompt 1 to get a JSON map of your image, then annotate the JSON with edit instructions for the objects you want to change, then use Prompt 2 with the original image and your edited JSON to generate the modified image. Works best in ChatGPT (GPT-4o) or Gemini. Claude can run Prompt 1 but cannot generate the output image.","prompt":"## Prompt 1 — Analyse your image\n\n> Send this with your image. Copy the JSON it returns.\n\n```\nAnalyse this image and return a JSON object only.\nNo prose, no markdown fences — just raw JSON.\n\n{\n  \"scene\": {\n    \"type\": \"\",\n    \"lighting\": \"\",\n    \"mood\": \"\",\n    \"background\": { \"description\": \"\", \"colour\": \"\", \"texture\": \"\" }\n  },\n  \"objects\": [\n    {\n      \"id\": \"unique_id e.g. sky_1, person_1\",\n      \"label\": \"human-readable name\",\n      \"type\": \"category\",\n      \"position\": { \"region\": \"e.g. top-left, centre, bottom-right\", \"x_pct\": 0, \"y_pct\": 0 },\n      \"visual\": { \"primary_colour\": \"\", \"material\": \"\", \"finish\": \"\" },\n      \"note\": \"anything relevant — pose, expression, condition, text content\"\n    }\n  ]\n}\n\nIdentify every distinct object. Return ONLY the JSON.\n```\n\n---\n\n## Prompt 2 — Apply your edits\n\n> Find the objects you want to change in the JSON. Add an `\"edit\"` field in plain English to each one — like the examples below. Then send this prompt with the original image + your edited JSON.\n\n**Example edits:**\n```json\n{ \"id\": \"sky_1\", \"label\": \"sky\", \"edit\": \"change to a deep orange and pink sunset\" }\n{ \"id\": \"jacket_1\", \"label\": \"man's jacket\", \"edit\": \"change colour from black to dark green\" }\n{ \"id\": \"bin_1\", \"label\": \"bin\", \"edit\": \"remove completely, fill with background pavement\" }\n```\n\n**The prompt:**\n```\nI am going to give you the original image and a JSON description of it.\nSome objects in the JSON have an \"edit\" field describing exactly what should change.\n\nReproduce the image in full, keeping everything identical — same composition,\nsame lighting, same style, same proportions — except apply every change\nspecified in the \"edit\" fields. Leave everything else untouched.\n\nHere is the JSON:\n\n[PASTE YOUR EDITED JSON HERE]\n```"},{"id":"ai-style-guide-how-to","title":"How to Create and Use a Style Guide with AI","topic":"Built by the Practice","source":"built","what":"Get consistent-looking outputs from AI - documents, dashboards, images - by creating a style guide once and attaching it to every relevant request. The whole process takes under five minutes.","when":"Use this when you want consistent visual or formatting output across multiple AI-generated artefacts — documents, dashboards, or images. Most useful when you have two or three existing examples that represent the look and feel you want to replicate.","prompt":"## Step 1 — Let AI write the style guide for you (2 minutes)\n\nOpen Claude, ChatGPT, or any capable AI. Upload two or three examples of outputs that represent the look and feel you want - these can be screenshots, PDFs, HTML files, Word documents, or images.\n\nThen send this prompt:\n\n```\nLook at the examples I have attached. Extract a style guide that captures\nthe visual and formatting rules used across them. Cover:\n\n- Colour palette (include hex codes where you can identify them)\n- Typography — fonts, weights, sizes\n- Layout principles — spacing, structure, grid behaviour\n- Component rules — how cards, tables, buttons, callouts are styled\n- Overall feel — one or two sentences describing the tone and intent\n\nReturn it as a clean, structured set of rules I can paste into future prompts.\nKeep it to one page.\n```\n\n---\n\n## Step 3 — Attach it to any AI request that needs it (seconds)\n\nWhen asking AI to build or create something, attach the `.md` file alongside your request and add one line of instruction:\n\n```\nUse the attached style guide for all visual and formatting decisions.\n\n[Your request here — e.g. build a project status dashboard with three KPI\ncards and a summary table, or draft a client update document on X]\n```"},{"id":"uu-role-based-website-generator","title":"UU Role-Based Website Generator — System Guide","topic":"Built by the Practice","source":"built","what":"This is a no-code system for building and maintaining a role-based, data-driven internal website — built primarily for operational environments where different people (roles) work across different areas and need to see the right KPIs, dashboards, and meetings relevant to them.\n\nThe system was originally developed for the United Utilities SSB programme, but the underlying approach is reusable for any environment where you need to present structured, role-specific operational information to non-technical users.","when":"- **Operational teams** who need to know what to look at, when, and why\n- **Programme managers or business leads** who want to maintain a single source of content truth without relying on a developer\n- **Anyone running a transformation programme** where roles, KPIs, and operating rhythms are actively evolving and need to be updated regularly","prompt":"## Part 0 — Building the system from scratch\n\n### Step 0.1 — Define what the website should do\n\n> *\"I want a simple website where a user selects where they work and what role they have, then sees KPIs, dashboards/tools, meetings across the week, and which dashboards to use in each meeting. The content should come from Excel, not hard-coded.\"*\n\n### Step 0.2 — Extract structure from your PowerPoint decks\n\n#### 0.2.1 Copy slide content in chunks\n\n> *\"From this content: identify roles, KPIs, dashboards/tools, meetings, and any cadence (daily / weekly / monthly). Summarise it in a structured list.\"*\n\n#### 0.2.2 Normalise the language\n\n> *\"Normalise this: remove duplicates, standardise names, suggest consistent role titles, flag overlaps or conflicts.\"*\n\n### Step 0.3 — Create the Excel file\n\n#### 0.3.1 Ask ChatGPT to design the tabs\n\n> *\"Design an Excel workbook to act as a source of truth for: roles, work areas, KPIs by role, dashboards by role, meetings by role, and which dashboards are used in which meetings. It should be easy for non-technical users.\"*\n\n#### 0.3.2 Create and populate the file\n\nTo populate, feed ChatGPT your extracted PowerPoint summaries and ask it to convert them into rows for each tab.\n\n### Step 0.4 — Create the HTML template\n\n#### 0.4.1 Ask ChatGPT for a plain-English description first\n\n> *\"Describe, in plain English, the sections this website should have: selectors, KPI cards, dashboard lists, meeting calendar, detail popups.\"*\n\n#### 0.4.2 Generate the HTML\n\n> *\"Generate a single-file HTML page that has dropdowns for work area and role, shows KPIs in four sections, shows dashboards in four sections, shows a weekly meeting view, and uses a JavaScript object called UU_CONFIG for its data.\"*\n\n### Step 0.5 — Create the generator script\n\n> *\"Write a Python script that reads an Excel workbook, builds a UU_CONFIG object, replaces UU_CONFIG inside an HTML template, and writes a new timestamped HTML file. Assume non-technical users will run it.\"*\n\n---\n\n## Part 1 — Day to day: run the generator\n\n```\npython -m pip install --upgrade pip\npython -m pip install openpyxl\npython generate_html_from_excel.py --excel UU_CONFIG_template_prepopulated.xlsx --html uu-concept.html\n```"},{"id":"claude-os-note-management","title":"Using Claude Code as a Note Management System","topic":"Built by the Practice","source":"built","what":"Most note-taking apps are good at storing information. They are poor at doing anything with it. You end up with notes you never re-read, no easy way to get a summary, and no way to ask questions across everything you've written.\n\nClaude Code fixes this. Because Claude can read files directly, you can build a structured folder of notes and then query them conversationally - \"what's outstanding for X?\", \"summarise everything I know about Y\", \"draft a document based on my notes.\" The notes stay in plain files you own. Claude becomes the layer that makes them useful.\n\nThis approach works especially well when you are tracking multiple things of the same type - clients, people, projects, research topics, job applications - where each one needs its own running log.","when":"This works best when you have:\n- **Multiple subjects to track** - 5 or more clients, people, topics, etc.\n- **Ongoing notes over time** - not a one-off document but a log that grows\n- **A recurring need to synthesise** - preparing for a meeting, writing a report, pulling together a summary\n- **Follow-up tasks mixed in** - things you need to do or check on, tied to specific subjects\n\nIf you are just writing a single document, you do not need this system. It earns its value when you are managing information across many subjects over weeks or months.\n\n**Examples of what this works well for:**\n- Tracking clients or accounts - notes on each relationship, open actions, history\n- Managing a team - observations, feedback, follow-ups per person\n- Research or study - notes per book, paper, or topic with a running log\n- Job searching - notes per company, interview prep, follow-ups\n- Supplier or vendor management - one file per vendor, contract notes, issues log\n- Mentoring or tutoring - progress notes per student, session summaries","prompt":"## CLAUDE.md template\n\n```markdown\n# Project: [Your Project Name]\n\n## What This Project Does\n\n[One sentence. Example: \"A running log of notes and follow-up tasks for each client I manage.\"]\n\n## Folder Structure\n\n- `subjects/` — one folder per [subject]. Each contains `notes.md` and an `evidence/` subfolder.\n- `task-log.md` — all open tasks across every subject in one place\n- `subjects/_template.md` — template for new subject files\n\n## Commands\n\n### Adding a note\nSay: \"Add note for [Name]: [what you want to record]\"\nClaude will append a dated entry to that subject's notes.md.\n\n### Adding a follow-up task\nSay: \"Add follow-up for [Name]: [what needs to happen]\"\nClaude will add a checkbox item to that subject's Open Follow-ups section and log it in task-log.md.\n\n### Checking open tasks\nSay: \"Show all open tasks\" or \"What's outstanding for [Name]?\"\nClaude will scan the files and list everything unchecked.\n\n### Preparing a summary\nSay: \"Summarise my notes on [Name]\" or \"Prepare a briefing for my meeting with [Name]\"\nClaude will read the notes file and produce a structured summary.\n\n### Marking a task done\nSay: \"Mark done: [task description] for [Name]\"\nClaude will tick the relevant checkbox.\n\n### Adding a new subject\nSay: \"Add [Name] as a new [subject type]\"\nClaude will create a folder and copy the template into it.\n\n### Saving evidence\nSay: \"Save this as evidence for [Name]: [paste the content]\"\nClaude will create a dated file in that subject's evidence/ folder and add a reference in notes.md.\n\n## Rules\n\n- Always date entries in the format YYYY-MM-DD\n- Never delete old entries - only add new ones or mark tasks complete\n- Filenames should be lowercase with hyphens (e.g. `john-smith/`, `2026-03-15-meeting-notes.md`)\n- When adding a task, always add it to both the subject's notes.md AND task-log.md\n```"},{"id":"alphasense-quick-start","title":"AlphaSense — Cited Research in Minutes","topic":"Built by the Practice","source":"built","what":"AlphaSense is a walled garden of premium, cited content you can't find on Google — earnings transcripts, 260K+ Tegus expert-interview transcripts, broker research from 1,500+ providers, company filings and trade journals — with AI that reasons across them like an analyst. Every answer is cited to the sentence so you can click through and verify before it lands in a client deck. Everyone in CS&G UKI already has a licence, no WBS code needed.","when":"- Finding cited benchmarks from sources you'd never find manually — earnings calls, expert interviews and broker research with specific figures attached\n- Ramping up on a new client or industry fast — a structured cited brief in seconds rather than days of desk research\n- Automating ongoing monitoring with scheduled Workflow Agents — proactive intel push rather than reactive search\n- Building competitive landscapes or market sizings via Deep Research — long-form cited brief in 10–30 minutes\n- Reading expert-interview transcripts you'd otherwise commission at £1,000+ a call","details":[{"type":"heading","text":"Why AlphaSense"},{"type":"paragraph","text":"Not another search engine — a walled garden of **premium, cited content** that you can't find on Google, with AI that reasons like an analyst."},{"type":"stats","items":[{"v":"500M+","k":"Premium documents"},{"v":"260K+","k":"Expert interviews"},{"v":"1,500+","k":"Broker partners"},{"v":"5M+","k":"UK companies on file"}]},{"type":"heading","text":"What's inside the platform"},{"type":"bullets","items":[{"label":"Earnings call transcripts","body":"Searchable across thousands of public companies globally, with AI that understands synonyms and intent — not just keywords."},{"label":"Tegus Expert Insights","body":"260K+ proprietary interview transcripts with former employees, competitors, customers and suppliers. The expert calls you'd normally commission at £1,000+ each — already done."},{"label":"Broker & equity research","body":"Aftermarket reports from 1,500+ providers including Goldman Sachs, Morgan Stanley, Barclays and Bank of America via Wall Street Insights."},{"label":"Company filings & regulatory docs","body":"SEC, Companies House and global equivalents — structured and AI-searchable."},{"label":"News & trade journals","body":"Top-tier media and industry-specific publications across energy, utilities, industrials, consumer and more."}]},{"type":"callout","tone":"purple","text":"**Every answer is cited to the sentence.** Unlike ChatGPT or Perplexity, every insight links back to the exact snippet in the source document. No hallucinations, no black boxes — click through and verify, then confidently use it in client decks."},{"type":"callout","tone":"teal","text":"**AI that thinks like an analyst.** Multiple specialised AI models that understand research intent — so when you search for \"field productivity improvements in UK utilities,\" it reasons across qualitative commentary and quantitative financial data to give you a proper answer."},{"type":"heading","text":"How it can help you"},{"type":"paragraph","text":"From proposal prep to project delivery — five real scenarios for CS&G teams."},{"type":"cards","items":[{"num":"01","title":"Find benchmarks from sources you'd never find manually","body":"Building a case for operational transformation in water? Ask: \"What field productivity improvements have UK water companies reported in the last 3 years?\" AlphaSense scans earnings transcripts, expert interviews and broker research to surface specific cited figures — e.g. a CEO quoting a 15% reduction in truck rolls, or an analyst noting first-time-fix rate improvements. Previously this would take days of desk research or expensive expert calls."},{"num":"02","title":"Ramp up on a new industry or client fast","body":"Pitching to a company you've never worked with? Ask: \"Summarise [Company X]'s strategic priorities, recent performance issues and competitive position.\" Within seconds you get a structured answer pulling from their latest earnings, broker coverage and expert commentary — with citations. Ideal for sharpening proposals."},{"num":"03","title":"Automate ongoing monitoring with Workflow Agents","body":"Set up a custom agent that runs weekly: \"Flag any news, analyst commentary or earnings mentions related to [client name] across operational efficiency, digital transformation and regulatory risk.\" The output lands in your inbox — no manual searching needed. Reactive monitoring becomes a proactive push."},{"num":"04","title":"Build a competitive landscape or market sizing","body":"Use Deep Research to ask: \"Conduct an in-depth analysis of the UK smart metering market — key players, market share, growth drivers and regulatory tailwinds.\" It runs dozens of searches across premium sources and produces a long-form cited brief in 10–30 minutes that would otherwise take days."},{"num":"05","title":"Extract insights from expert calls without commissioning new ones","body":"The Tegus Expert Insights library lets you read transcripts from former employees and customers of your target company. Working on a utilities transformation and want to understand how a peer handled workforce planning challenges? There's likely already an interview with a former ops director covering exactly that."}]},{"type":"heading","text":"Get started in 5 minutes"},{"type":"callout","tone":"green","text":"**Everyone in the team already has a licence — no WBS code needed.** If you haven't activated yet, email Shauna McCaffrey (smccaffrey@alpha-sense.com) to get set up."},{"type":"cards","items":[{"num":"A","title":"Generative Search — your starting point","body":"Type a natural-language question → get a cited, structured answer from all available sources. Be specific: state the industry, geography and time period. Use the Sources filter to narrow to expert calls or broker research. Ask follow-ups to go deeper. Toggle Web Search on to include open-web results. **Best for:** quick answers, proposal prep, client research, finding cited datapoints and benchmarks."},{"num":"B","title":"Deep Research — for complex briefs","body":"Switch to Deep Research mode for questions needing thorough, multi-step analysis. It takes 10–30 minutes but autonomously plans, searches and synthesises a long-form report across hundreds of documents. Export as PDF or build slides directly. **Best for:** industry primers, competitive landscapes, market entry analysis, board-level briefings."},{"num":"C","title":"Workflow Agents — automate the repeatable","body":"Go to Custom Agents → +New Agent → name it, write a prompt (use variables like {Company Name} to reuse across clients) → schedule it weekly or monthly. Outputs are delivered to your inbox automatically. **Best for:** ongoing client monitoring, competitive alerts, regular sector updates, recurring research tasks."}]},{"type":"heading","text":"Useful links"},{"type":"links","items":[{"label":"Getting started guide","url":"https://help.alpha-sense.com/hc/en-us/articles/41098563605395"},{"label":"Live training sessions","url":"https://help.alpha-sense.com/hc/en-us/articles/41248264629651"},{"label":"Generative Search tips","url":"https://help.alpha-sense.com/hc/en-us/articles/41666587181203"},{"label":"Workflow Agents guide","url":"https://help.alpha-sense.com/hc/en-us/articles/48564685232275"},{"label":"Customer support","url":"https://help.alpha-sense.com/hc/en-us"}]}],"prompt":"# ──────────────────────────────────────────────────────────────\n# EXAMPLE QUERIES — paste straight into AlphaSense\n# ──────────────────────────────────────────────────────────────\n\n# GENERATIVE SEARCH — quick, cited answers\n\nWhat field productivity improvements have UK water companies reported\nin the last 3 years? Pull cited examples from earnings calls and\nexpert interviews. Include figures where available.\n\nSummarise [Company X]'s strategic priorities, recent performance issues\nand competitive position. Use the latest earnings, broker coverage and\nexpert commentary. Cite everything.\n\nWhat are smart-metering peer companies saying about workforce planning\nand digital transformation? Filter sources to expert interviews\n(Tegus) from the last 18 months.\n\n# ──────────────────────────────────────────────────────────────\n# DEEP RESEARCH — industry primers, 10–30 min, long-form output\n# ──────────────────────────────────────────────────────────────\n\nConduct an in-depth analysis of the UK smart metering market.\nCover: key players and market share, growth drivers, regulatory\ntailwinds (Ofgem, DESNZ), and the competitive position of the\nthree largest installers. Include cited figures throughout.\nReturn as a structured report.\n\n# ──────────────────────────────────────────────────────────────\n# WORKFLOW AGENT — scheduled, lands in your inbox\n# ──────────────────────────────────────────────────────────────\n\nName: {Company} weekly intel\n\nFlag any news, analyst commentary or earnings mentions related to\n{Company} across these themes:\n  - Operational efficiency\n  - Digital transformation\n  - Regulatory risk\n\nReturn the top 5 items as a bulleted brief with citations,\norganised by theme. Include a one-line \"so what\" for each item.\n\nSchedule: every Monday, 07:00."},{"id":"apple-teaser-video","title":"Apple-Style Teaser Video with Claude","topic":"Built by the Practice","source":"built","what":"Finish with a 30-45 second motion-graphics teaser video for any product, project or programme. No video-editing software, no cash cost. Claude writes the script, drafts the music brief and assembles the final video. You paste the outputs into two free websites (ElevenLabs for voice-over, Suno for music) and hand the audio files back. Claude scaffolds a Remotion project, times the visuals to the voice-over waveform, and renders a 1920×1080 MP4. Around an hour of total time, most of which is waiting.","when":"- Launching a programme, product or initiative and you want a teaser to anchor the announcement\n- You need an Apple-style motion-graphics piece — type-driven, restrained, dark canvas — and don't have After Effects\n- The message is tight: one idea, 30-45 seconds, three things to land\n- You want full creative control through iteration rather than a stock-template feel\n- The audience will see this on a deck, a Slack channel or a SharePoint page — not a billboard","details":[{"type":"heading","text":"Pipeline at a glance"},{"type":"paragraph","text":"Four tools, one pipeline. Claude writes the script and builds the video. **ElevenLabs** (free tier) generates the voice-over. **Suno** (free tier) generates the music bed. **Remotion** renders the final MP4 on your machine."},{"type":"stats","items":[{"v":"~1 hr","k":"Total time"},{"v":"£0","k":"Cash cost"},{"v":"30-45s","k":"Output length"},{"v":"1080p","k":"MP4 render"}]},{"type":"heading","text":"One-time setup (~10 minutes)"},{"type":"paragraph","text":"You only do this the first time."},{"type":"bullets","items":[{"label":"Claude Code","body":"assumed — you're reading this."},{"label":"Node.js","body":"install the LTS from [nodejs.org](https://nodejs.org). Lets Claude build and render the video on your machine."},{"label":"FFmpeg","body":"open PowerShell and run `winget install Gyan.FFmpeg`. Restart the terminal afterwards. Needed for audio analysis and final encoding."},{"label":"ElevenLabs","body":"free account at [elevenlabs.io](https://elevenlabs.io). Generates the voice-over."},{"label":"Suno","body":"free account at [suno.com](https://suno.com). Generates the music."}]},{"type":"heading","text":"The seven steps"},{"type":"paragraph","text":"Each step has a paste-ready prompt — they're in the **Prompt &middot; playbook** block at the bottom. The notes below are the human-side actions between prompts."},{"type":"cards","items":[{"num":"01","title":"Tell Claude what the video is about (5 min)","body":"Open Claude in the folder where you want the project to live. Send the **script prompt** (in the playbook). Claude returns a structured script broken into beats — what is on screen, the voice-over line, motion direction. Read it, push back on anything that does not fit. Iterate until the words and flow are right."},{"num":"02","title":"Get a clean voice-over script (1 min)","body":"Once the script lands, ask Claude for a separate .md with just the voice-over — lines, pauses tagged like `[pause 1.5s]`, and a short voice-direction note at the top."},{"num":"03","title":"Generate the voice-over in ElevenLabs (5 min)","body":"Log in → **Text to Speech** → paste the lines → pick a voice that matches Claude's direction (\"Mark — Solid, Clear and Professional\" works for a confident UK read) → **Generate** → download the MP3 into the project folder."},{"num":"04","title":"Get a music prompt from Claude (1 min)","body":"Send the **music prompt** in the playbook. Claude returns a paste-ready Suno prompt with style, BPM, key and structural notes — built to match the script."},{"num":"05","title":"Generate the music in Suno (5 min)","body":"Suno → **Create** → paste the prompt into the description field. **Toggle \"Instrumental\" on** (otherwise Suno may add lyrics). Generate. Listen to the two takes, pick the one with the cleanest build, download the MP3 into the project folder."},{"num":"06","title":"Hand everything to Claude (1 min + 5-10 min render)","body":"Drop `vo.mp3` and `music.mp3` into the folder, then send the **video build prompt**. Claude scaffolds a Remotion project, builds the motion components, times them to the voice-over waveform using FFmpeg silence detection, ducks the music under the voice, and renders the MP4. You will get `teaser-v1.mp4` in the folder."},{"num":"07","title":"Iterate (this is where the magic happens)","body":"Watch v1. It will be close but not perfect. Tell Claude exactly what is off, in plain language: \"The reveal moment feels weak — replace it with flowing streamlines that converge into the wordmark.\" \"The three questions arrive too fast — slow down the second and third by half a second each.\" \"The cursor is too bright in Beat 1, tone it down.\" Claude adjusts, re-renders, produces v2, v3, v4. Keep going until it sings."}]},{"type":"callout","tone":"purple","text":"**Trust the silence-detection step.** Without timing the visuals to the actual audio waveforms, the result feels sloppy. This is the step that separates a polished teaser from a generic one — worth insisting on in Step 6."},{"type":"heading","text":"Tips that save hours"},{"type":"bullets","items":[{"label":"Be specific about reference style.","body":"\"Apple product teaser\" is good. \"Vision Pro launch video\" is better. The closer the reference, the closer the output."},{"label":"Keep version numbers.","body":"`v1.mp4`, `v2.mp4`, `v3.mp4`. Lets you compare and roll back when a change makes things worse."},{"label":"Iterate one thing at a time.","body":"\"Fix the reveal AND change the colours AND speed up Beat 3\" is a recipe for confusion. Do one, render, check, move on."},{"label":"Don't fight Claude on technical details.","body":"If Claude wants to use a particle field instead of CSS animations because it will render better, let it."}]},{"type":"heading","text":"What this whole thing costs"},{"type":"callout","tone":"green","text":"**Total cash cost: zero** — assuming you stay in the free tiers. Claude is included in your usage. ElevenLabs free tier gives 10,000 characters per month and a 45-second teaser uses ~250, so you can make around 40 teasers a month. Suno's free tier is 50 credits per day (~10 generations). Node.js and FFmpeg are free, open source."},{"type":"heading","text":"What good looks like"},{"type":"paragraph","text":"A finished teaser of this style sits at the intersection of three things."},{"type":"bullets","items":[{"label":"Words that earn their place.","body":"Every line in the voice-over should be something the audience would actually quote back to you."},{"label":"Motion that feels intentional.","body":"Not \"lots of stuff moving\" but \"one motif executed well across the whole film\"."},{"label":"Audio that breathes with the visuals.","body":"Music dips when the voice speaks, lifts on the reveal, fades on the close."}]},{"type":"paragraph","text":"Get those three right and you have an Apple-style teaser. The tools just need to keep up with the taste."}],"prompt":"# ──────────────────────────────────────────────────────────────\n# 1. SCRIPT PROMPT — send this in the project folder\n# ──────────────────────────────────────────────────────────────\n\nI want a short, Apple-style teaser video for [DESCRIBE WHAT IT'S FOR].\nAround 30-45 seconds. Type-driven, dark canvas, minimal, restrained.\nAudience is [WHO IT'S FOR]. Three key things I want to land are\n[A, B, C].\n\nWrite me a teaser script as a .md file. Break it into beats.\nFor each beat, give me: what's on screen, the voice-over line,\nand any motion-graphics direction. Apple product teaser tone -\nsparse, declarative, lots of negative space.\n\n# ──────────────────────────────────────────────────────────────\n# 2. VOICE-OVER PROMPT — once the script is right\n# ──────────────────────────────────────────────────────────────\n\nNow give me a separate .md with JUST the voice-over - the lines and\npauses between them, ready to paste into ElevenLabs. Mark pauses with\n[pause 1.5s] style tags. Add a short note at the top describing the\nvoice direction (accent, tone, pace).\n\n# ──────────────────────────────────────────────────────────────\n# 3. MUSIC PROMPT — for Suno\n# ──────────────────────────────────────────────────────────────\n\nI'm on the free tier of Suno. Give me a one-shot music prompt for a\n~45-second instrumental bed track that builds slowly and lifts on the\nreveal. Match the mood to the teaser script. Include the full prompt\ntext I can paste straight into Suno.\n\n# ──────────────────────────────────────────────────────────────\n# 4. VIDEO BUILD PROMPT — once vo.mp3 and music.mp3 are in the folder\n# ──────────────────────────────────────────────────────────────\n\nI've added two files to the folder - vo.mp3 is the voice-over,\nmusic.mp3 is the bed track. Build a Remotion video that:\n\n1. Times the visuals to the voice-over (detect where each line falls\n   using ffmpeg silence detection - this is critical for timing)\n2. Plays the music underneath, ducking the volume when the voice\n   is speaking\n3. Uses the script we wrote earlier as the basis for each beat\n4. Renders as a 1920x1080 MP4 at 30fps\n\nMake it Apple-style: dark canvas, magenta and white accents,\ntypography as the hero. Save the final MP4 to the project folder.\nIterate in small chunks so I can see progress.\n\n# ──────────────────────────────────────────────────────────────\n# 5. ITERATION PROMPTS — examples, swap in your own notes\n# ──────────────────────────────────────────────────────────────\n\nThe reveal moment feels weak. Can you replace it with flowing\nstreamlines that converge into the wordmark - something that\nactually wows the audience?\n\nThe three questions arrive too fast. Slow down the second and\nthird by half a second each.\n\nThe cursor is too bright in Beat 1. Tone it down."},{"id":"ai-persona-system-instructions","title":"AI Persona System Instructions","topic":"AI Tooling","source":"template","what":"A system instruction template for defining a consistent AI persona — role, communication style, constraints, and brand values — to be set once and applied across all subsequent prompts in a session or deployment.","when":"Use this when building a customer-facing AI assistant or any product that needs a consistent voice across multiple interactions. Setting the persona in system instructions is more token-efficient than repeating it in every prompt, and it ensures brand tone never drifts between turns.","prompt":"```\nYou are the [ROLE/TITLE] at [COMPANY NAME]. You write like a [PERSONALITY\nDESCRIPTOR]: [TRAIT 1], [TRAIT 2], and [TRAIT 3].\n\nCOMMUNICATION STYLE:\n- You never [AVOID BEHAVIOR]\n- You always [DESIRED BEHAVIOR]\n- Keep sentences [STRUCTURE GUIDELINE]\n- Tone: \"[TONE DESCRIPTOR]\"\n\nCONSTRAINTS:\n- [CONSTRAINT 1]\n- [CONSTRAINT 2]\n- [CONSTRAINT 3]\n\nBRAND VALUES:\n- What we ARE: [3-4 descriptors]\n- What we're NOT: [3-4 anti-patterns]\n```\n\n---\n\n### Example: HealthTech Patient Communication (MediCare)\n\n```\nYou are the MediCare AI Health Assistant. You write like a caring healthcare professional:\nempathetic, clear, and reassuring.\n\nCOMMUNICATION STYLE:\n- You never use medical jargon without explanation\n- You always acknowledge patient concerns before providing information\n- Keep sentences simple, direct, and compassionate\n- Tone: \"Warm but professional, like a trusted family doctor\"\n\nCONSTRAINTS:\n- Never diagnose conditions (always recommend consulting a doctor)\n- Always include disclaimers for medical advice\n- Use metric units (mg, ml) with common equivalents\n\nBRAND VALUES:\n- What we ARE: Caring, accessible, evidence-based, patient-first\n- What we're NOT: Cold, rushed, overly technical, dismissive\n```"},{"id":"brainstorming-high-temperature","title":"Brainstorming (High Temperature)","topic":"AI Tooling","source":"template","what":"A high-temperature prompt configuration for generating large volumes of unconventional, creative ideas — designed to push the AI away from obvious outputs by combining role framing, explicit creative constraints, and structured per-idea output fields.","when":"Use this when you need divergent thinking: campaign ideation, product naming, feature brainstorming, or any task where originality matters more than consistency. Set temperature to 1.5-2.0 and Top P to 0.8-1.0 in AI Studio before running.","prompt":"```\nCONFIGURATION:\n- Temperature: [1.5-2.0 for maximum creativity]\n- Top P: [0.8-1.0 for wide exploration]\n\nAct as a [ROLE] brainstorming [TOPIC] for [COMPANY/PROJECT].\n\nGOAL: Generate [NUMBER] wildly creative, unconventional ideas for [SPECIFIC CHALLENGE].\n\nCONSTRAINTS:\n- No idea is too ambitious\n- Think beyond current limitations\n- Combine unexpected concepts\n- Challenge industry norms\n\nCONTEXT:\n- Target audience: [AUDIENCE]\n- Current problem: [PROBLEM]\n- What competitors do: [COMPETITOR APPROACH]\n- What we want to be different: [DIFFERENTIATOR]\n\nGenerate [NUMBER] ideas. For each, provide:\n- Idea Title (provocative, memorable)\n- One-sentence description\n- Why it's unconventional\n- Potential impact (if it works)\n```\n\n---\n\n### Example: Sustainable Fashion Campaign Ideas (EcoThreads)\n\n```\nCONFIGURATION:\n- Temperature: 1.9\n- Top P: 0.9\n\nAct as a creative director brainstorming marketing campaigns for EcoThreads sustainable\nfashion brand.\n\nGOAL: Generate 10 wildly creative, unconventional campaign ideas for launching our\nrecycled denim line to Gen Z.\n\nCONSTRAINTS:\n- No idea is too ambitious\n- Think beyond Instagram posts\n- Combine unexpected mediums\n- Challenge fast fashion norms\n\nCONTEXT:\n- Target audience: Gen Z, 18-25, environmentally conscious, skeptical of greenwashing\n- Current problem: Sustainable fashion is seen as boring and expensive\n- What competitors do: Influencer partnerships, sustainability reports\n- What we want to be different: Make sustainability exciting, not preachy\n\nGenerate 10 ideas. For each, provide:\n- Idea Title (provocative, memorable)\n- One-sentence description\n- Why it's unconventional\n- Potential viral factor\n```"},{"id":"classification-few-shot-examples","title":"Classification with Few-Shot Examples","topic":"AI Tooling","source":"template","what":"A few-shot classification prompt that assigns each item in a dataset to one of a fixed set of categories, using labelled examples to calibrate the AI's reasoning before it processes the real data.","when":"Use this when you need consistent, explainable classification of text items — support tickets, transactions, leads, content — and want the AI to return a confidence level and one-sentence rationale for each decision.","prompt":"```\nClassify each [ITEM] into one of these categories: [CATEGORY 1], [CATEGORY 2],\n[CATEGORY 3], [CATEGORY 4].\n\nFollow these examples:\n\nExample 1:\n[ITEM]: \"[SAMPLE 1]\"\nClassification: [CATEGORY]\nReason: [WHY IT BELONGS TO THIS CATEGORY]\n\nExample 2:\n[ITEM]: \"[SAMPLE 2]\"\nClassification: [CATEGORY]\nReason: [WHY IT BELONGS TO THIS CATEGORY]\n\nNow classify these [ITEMS]:\n[ITEM 1]: \"[YOUR DATA]\"\n[ITEM 2]: \"[YOUR DATA]\"\n[ITEM 3]: \"[YOUR DATA]\"\n\nFor each, provide:\n- Classification\n- Confidence Level (High/Medium/Low)\n- Reason (one sentence)\n```\n\n---\n\n### Example: FinTech Transaction Categorisation (PayNow)\n\n```\nClassify each transaction into one of these categories: Fraudulent, Suspicious, Legitimate,\nNeeds Review.\n\nFollow these examples:\n\nExample 1:\nTransaction: \"₹50,000 transfer at 3 AM to new beneficiary, first transaction\"\nClassification: Suspicious\nReason: High-value late-night transfer to unknown account\n\nExample 2:\nTransaction: \"₹500 UPI payment to grocery store, regular merchant\"\nClassification: Legitimate\nReason: Small amount, known merchant, normal hours\n\nNow classify these transactions:\nTransaction 1: \"₹1,25,000 international transfer, user just changed password\"\nTransaction 2: \"₹200 coffee shop payment, same location as last 10 transactions\"\nTransaction 3: \"₹75,000 to crypto exchange, account opened yesterday\"\n\nFor each, provide:\n- Classification\n- Confidence Level (High/Medium/Low)\n- Reason (one sentence)\n```"},{"id":"document-grounded-analysis","title":"Document-Grounded Analysis","topic":"AI Tooling","source":"template","what":"A grounding prompt that restricts the AI to answering questions using only information explicitly stated in an attached document, with mandatory source citations and a confidence rating for each answer.","when":"Use this whenever accuracy is non-negotiable and hallucination is unacceptable — legal documents, product roadmaps, compliance policies, research reports. The \"not mentioned\" fallback and citation requirement are the critical discipline that makes outputs trustworthy.","prompt":"```\nBased ONLY on the attached [DOCUMENT TYPE], answer the following questions:\n\nINSTRUCTIONS:\n- Only use information explicitly stated in the document\n- If information is not in the document, say \"Not mentioned in the provided document\"\n- Cite specific sections/pages when referencing information\n- Do not invent, assume, or extrapolate beyond what's written\n\nQUESTIONS:\n1. [QUESTION 1]\n2. [QUESTION 2]\n3. [QUESTION 3]\n\nFORMAT:\nFor each answer, provide:\n- Answer: [Your response]\n- Source: [Section/Page reference]\n- Confidence: [High/Medium/Low based on clarity in document]\n```\n\n---\n\n### Example: B2B SaaS Product Roadmap\n\n```\nBased ONLY on the attached Q4 2024 Product Roadmap, answer the following questions:\n\nINSTRUCTIONS:\n- Only use information explicitly stated in the roadmap\n- If information is not in the roadmap, say \"Not mentioned in the provided roadmap\"\n- Cite specific quarters/sections when referencing features\n- Do not invent, assume, or extrapolate launch dates\n\nQUESTIONS:\n1. What new features are launching in October 2024?\n2. Which team owns the \"Advanced Analytics Dashboard\" feature?\n3. What customer pain point does the \"Bulk Import Tool\" solve?\n4. Are there any features planned for mobile app specifically?\n\nFORMAT:\nFor each answer, provide:\n- Answer: [Your response]\n- Source: [Section/Quarter reference]\n- Confidence: [High/Medium/Low based on clarity in roadmap]\n```"},{"id":"few-shot-feedback-analysis","title":"Few-Shot Feedback Analysis","topic":"AI Tooling","source":"template","what":"A few-shot prompt pattern for extracting recurring themes or issues from large volumes of unstructured data (reviews, survey responses, support tickets), using labelled examples to anchor the AI's output format and categorisation logic.","when":"Use this when you have a batch of qualitative data and need consistent, structured summaries. The few-shot examples teach the AI exactly how to categorise and format each finding — critical when consistency matters more than creativity.","prompt":"```\nYou are an analyst at [COMPANY NAME]. Read the following [DATA TYPE] and summarize\nrecurring [PATTERNS/ISSUES].\n\nFollow this pattern strictly:\n\nExample 1:\n[DATA TYPE]: \"[SAMPLE INPUT 1]\"\nSummary: [CATEGORY] – [ONE-LINE DESCRIPTION]\n\nExample 2:\n[DATA TYPE]: \"[SAMPLE INPUT 2]\"\nSummary: [CATEGORY] – [ONE-LINE DESCRIPTION]\n\nNow analyze all given [DATA TYPE] and summarize the top [NUMBER] recurring\n[PATTERNS/ISSUES] with:\n- [FIELD 1]: [Description]\n- [FIELD 2]: [Description]\n- [FIELD 3]: [Description]\n- [FIELD 4]: [Description]\n\n[PASTE YOUR DATA HERE]\n```\n\n---\n\n### Example 1: E-commerce Customer Reviews (ShopFast)\n\n```\nYou are an analyst at ShopFast. Read the following customer reviews and summarize\nrecurring complaints.\n\nFollow this pattern strictly:\n\nExample 1:\nReview: \"Package arrived damaged, box was crushed\"\nSummary: Shipping Issue – Product damage during delivery\n\nExample 2:\nReview: \"Website crashed during checkout, lost my cart\"\nSummary: Technical Issue – Checkout flow failure\n\nNow analyze all given reviews and summarize the top 5 recurring issues with:\n- Issue Title\n- Short Summary\n- Example Quotes (2–3)\n- Approximate Mentions\n\n[PASTE 100+ REVIEWS HERE]\n```\n\n---\n\n### Example 2: HR Tech Employee Feedback (TalentFlow)\n\n```\nYou are an analyst at TalentFlow. Read the following employee survey responses and\nsummarize recurring themes.\n\nFollow this pattern strictly:\n\nExample 1:\nResponse: \"Need more flexible work hours\"\nSummary: Work-Life Balance – Request for flexible scheduling\n\nExample 2:\nResponse: \"Career growth path unclear\"\nSummary: Career Development – Lack of advancement clarity\n\nNow analyze all given responses and summarize the top 5 recurring themes with:\n- Theme Title\n- Short Summary\n- Example Quotes (2–3)\n- Approximate Mentions\n\n[PASTE SURVEY RESPONSES HERE]\n```"},{"id":"image-analysis-multimodal","title":"Image Analysis (Multimodal)","topic":"AI Tooling","source":"template","what":"A vision prompt for systematically extracting visual elements, text content, and contextual analysis from an image, returning findings as structured JSON with a confidence rating.","when":"Use this when you need consistent, auditable image analysis rather than a freeform description — quality control pipelines, document processing, logistics inspection, or any use case where image outputs need to feed into a downstream system.","prompt":"```\nYou are analyzing an image for [PURPOSE].\n\nTASK: Examine the provided image and extract:\n\nVISUAL ELEMENTS:\n- [Element 1 to identify]\n- [Element 2 to identify]\n- [Element 3 to identify]\n\nTEXT CONTENT:\n- Extract all visible text\n- Note any handwritten content\n- Identify labels, tags, or annotations\n\nCONTEXT ANALYSIS:\n- What is the primary subject?\n- What environment/setting is shown?\n- Any notable issues, anomalies, or patterns?\n\nOUTPUT FORMAT:\n{\n  \"visual_summary\": \"[Brief description]\",\n  \"extracted_text\": \"[All text found]\",\n  \"identified_elements\": {\n    \"[element_1]\": \"[details]\",\n    \"[element_2]\": \"[details]\"\n  },\n  \"analysis\": \"[Your interpretation]\",\n  \"confidence\": \"[High/Medium/Low]\"\n}\n\nCONSTRAINTS:\n- [Constraint 1]\n- [Constraint 2]\n```\n\n---\n\n### Example: E-commerce Product Quality Check (ShopFast)\n\n```\nYou are analyzing product photos for ShopFast quality control.\n\nTASK: Examine the provided image and extract:\n\nVISUAL ELEMENTS:\n- Product condition (new, damaged, defective)\n- Packaging quality (intact, torn, crushed)\n- Visible defects or irregularities\n- Completeness (all items present)\n\nTEXT CONTENT:\n- Extract all visible labels, barcodes, SKU numbers\n- Note expiry dates if visible\n- Identify any warning labels or damage markers\n\nCONTEXT ANALYSIS:\n- Does product match catalogue description?\n- Any shipping damage visible?\n- Is packaging tampered or resealed?\n- Photo quality adequate for assessment?\n\nOUTPUT FORMAT:\n{\n  \"visual_summary\": \"Brief description of what you see\",\n  \"product_condition\": \"new/good/damaged/defective\",\n  \"packaging_status\": \"intact/minor_damage/major_damage\",\n  \"extracted_text\": \"SKU: XXX, Barcode: XXX, Expiry: XXX\",\n  \"defects_identified\": [\"List any visible issues\"],\n  \"pass_quality_check\": true/false,\n  \"reviewer_notes\": \"Explanation of decision\",\n  \"confidence\": \"High/Medium/Low\"\n}\n\nCONSTRAINTS:\n- If image quality is poor, note in confidence level\n- Flag any tampering indicators\n- For food/pharma products, always check expiry visibility\n```"},{"id":"process-documentation-generator","title":"Process Documentation Generator","topic":"AI Tooling","source":"template","what":"A prompt template for building an app that turns a rough description of a business process into professionally formatted documentation - including step-by-step instructions, role assignments, a flowchart, and a training checklist.","when":"Use this when operations or delivery teams need to document how something works but lack the time or template to produce it consistently. Useful for SOPs, onboarding guides, and handover documents.","prompt":"```\nBuild a 'Process Documentation Generator' app.\n\nINPUT FIELDS:\n- 'Process Name': text input\n- 'Process Owner': text input\n- 'Process Description': text area\n- 'Main Steps': text area (placeholder: \"List the major steps, one per line\")\n- 'Common Challenges': text area (optional)\n- 'Required Tools/Systems': text input\n\nOUTPUT:\nUse Gemini to create professional process documentation with:\n- Executive summary (2-3 sentences)\n- Detailed step-by-step instructions (numbered list)\n- For each step: What to do, Who is responsible, What tools to use, Expected outcome\n- Troubleshooting section (if challenges provided)\n- Success criteria\n- Estimated time to complete\n- Visual process flowchart (text-based Mermaid diagram)\n\nADDITIONAL:\n- 'Export as PDF' button\n- 'Export as Markdown' for wiki/Notion\n- 'Create Training Checklist' from this process\n```"},{"id":"vendor-comparison-tool","title":"Vendor Comparison Tool","topic":"AI Tooling","source":"template","what":"A prompt template for building a structured vendor comparison app that takes inputs for multiple vendors, scores them against weighted criteria, and produces an AI-generated recommendation with a total cost of ownership projection.","when":"Use this when procurement or operations teams need to evaluate competing suppliers or software options and want a structured, auditable comparison rather than a spreadsheet built from scratch.","prompt":"```\nBuild a 'Vendor Comparison Tool' for procurement decisions.\n\nINPUT SECTION:\n- 'What are you buying?': text input\n- 'Number of Vendors to Compare': dropdown (2, 3, 4, 5)\n- For each vendor: Name, Monthly/Annual Cost, Key Features, Contract Length, Support Level, Additional Notes\n- 'Decision Criteria Priority': rank these factors (Cost, Features, Support Quality, Scalability, Ease of Use, Integration Capabilities)\n\nOUTPUT:\nDisplay side-by-side comparison table with:\n- All vendors in columns, all criteria in rows\n- Color coding: Best option (green), Middle (yellow), Worst (red) for each criteria\n- Overall score for each vendor (0-100)\n- AI-generated recommendation: \"Best Choice: [Vendor] because...\"\n- Total Cost of Ownership calculation (3-year projection)\n- Risk assessment for each vendor\n\nADDITIONAL:\n- 'Generate Decision Report' for stakeholders\n- 'Export Comparison' as Excel\n```"},{"id":"comprehensive-competitor-comparison-table","title":"Comprehensive Competitor Comparison Table","topic":"Research","source":"template","what":"A structured prompt that generates a detailed comparison table of competitors in a product category, covering customer segments, key metrics, USPs, and user complaints, then identifies the gaps your product could fill.","when":"Use this in NotebookLM (with competitor research already uploaded) or in a deep research tool when you need a side-by-side view of the market to inform positioning or pitch deck slides.","prompt":"Create a detailed comparison table of [PRODUCT CATEGORY] competitors in [REGION].\n\nInclude:\n1. Company name\n2. Target customer segment (age, income, behavior)\n3. [KEY METRIC 1] (e.g., credit limit range, pricing tiers)\n4. [KEY METRIC 2] (e.g., interest/fee structure)\n5. [KEY METRIC 3] (e.g., approval time, setup time)\n6. Key merchant partners/integrations\n7. Unique selling point\n8. Biggest user complaint (from reviews/articles if available)\n\nThen identify gaps that [YOUR COMPANY] could fill based on my product spec.\n\n---\n\n**Variables to customise:**\n- `[PRODUCT CATEGORY]` - The market category (e.g., BNPL, CRM tools, HR software)\n- `[REGION]` - Geographic scope\n- `[KEY METRIC 1/2/3]` - The metrics most relevant to your category\n- `[YOUR COMPANY]` - Your company or product name\n\n**Example:**\nCreate a detailed comparison table of BNPL competitors in India. Include company name, target customer segment, credit limit range, interest/late fee structure, approval time, key merchant partners, unique selling point, and biggest user complaint. Then identify gaps that PayNow could fill based on my product spec."},{"id":"document-synthesis","title":"Document Synthesis","topic":"Research","source":"template","what":"A prompt that synthesises insights across multiple uploaded documents, identifying the most important themes, where sources agree and conflict, what is missing, and which findings are high-confidence vs. requiring further validation.","when":"Use this in NotebookLM when you have uploaded a set of research documents and need to produce a coherent picture of what they collectively say, rather than reviewing each document individually.","prompt":"I've uploaded [NUMBER] documents covering [TOPIC].\n\nSynthesise the key insights across all documents:\n1. What are the 3-5 most important themes?\n2. Where do sources agree?\n3. Where do sources conflict?\n4. What's missing from the collective picture?\n5. What are the highest-confidence insights?\n6. What requires more validation?\n\n---\n\n**Variables to customise:**\n- `[NUMBER]` - Total number of documents uploaded\n- `[TOPIC]` - The subject matter covered by the documents (e.g., the Indian BNPL market, Gen Z financial behaviour)"},{"id":"feature-demand-research","title":"Feature Demand Research","topic":"Research","source":"template","what":"A deep research prompt that surfaces what features a specific target audience wants most from a product type, including pain points, gaps in existing solutions, pricing sensitivity, and adoption barriers.","when":"Use this before starting product design or roadmap planning to ground feature decisions in real demand signals rather than assumptions.","prompt":"What features do [TARGET AUDIENCE] in [COUNTRY/REGION] want most from [PRODUCT TYPE]?\n\nFocus on:\n1. Most requested features\n2. Pain points driving feature demand\n3. Comparison with what existing solutions offer\n4. Pricing sensitivity around features\n5. Feature adoption barriers\n\n---\n\n**Variables to customise:**\n- `[TARGET AUDIENCE]` - Who you are designing for (e.g., freelancers, Gen Z students, SME owners)\n- `[COUNTRY/REGION]` - Geographic scope\n- `[PRODUCT TYPE]` - The product category (e.g., digital banking apps, project management tools)\n\n**Example:**\nWhat features do freelancers in India want most from digital banking apps?"},{"id":"feature-gap-identification","title":"Feature Gap Identification","topic":"Research","source":"template","what":"A prompt that categorises features from your product spec and the competitive landscape into three buckets - table stakes, differentiators, and white space - and explains why your unique features matter to your target customer.","when":"Use this in NotebookLM after running a competitive analysis, to sharpen your MVP scope and build the differentiation section of your pitch.","prompt":"Based on the competitive analysis and my product spec, identify:\n\n1. Features that ALL competitors have (table stakes)\n2. Features that SOME competitors have (differentiators)\n3. Features that NO competitors have (white space)\n4. Features in my spec that overlap with competitors\n5. Features in my spec that are unique\n\nFor each unique feature, explain why it matters to my target customer.\n\n---\n\n**How to use:**\nUpload your product spec and competitive analysis (or the output from the Competitive Intelligence prompt) to NotebookLM before running this prompt. No additional variables to fill in - the prompt works directly from your uploaded context."},{"id":"industry-trends-and-insights","title":"Industry Trends and Insights","topic":"Research","source":"template","what":"A deep research prompt that produces a structured view of the key trends shaping an industry over a given timeframe, covering technology, regulation, consumer behaviour, investment patterns, and lessons from recent successes and failures.","when":"Use this to build the 'market context' section of a pitch deck or investor brief, or to orient yourself before entering a new industry vertical.","prompt":"What are the key trends in [INDUSTRY] for [TIMEFRAME]?\n\nCover:\n1. Emerging technologies\n2. Regulatory changes\n3. Consumer behavior shifts\n4. Investment patterns\n5. Success and failure patterns\n\n---\n\n**Variables to customise:**\n- `[INDUSTRY]` - The sector you are researching (e.g., fintech, healthtech, edtech, logistics)\n- `[TIMEFRAME]` - The period you want to cover (e.g., 2025-2026, the next 3 years)\n\n**Example:**\nWhat are the key trends in fintech for 2025-2026 in India?"},{"id":"market-research","title":"Market Research","topic":"Research","source":"template","what":"A PTCF-structured prompt that produces a comprehensive market analysis covering TAM/SAM/SOM, trends, customer segments, competitive landscape, barriers to entry, and strategic opportunities.","when":"Use this when preparing for a pitch deck, investor meeting, or strategic planning session and you need a structured market brief fast.","prompt":"**PERSONA:**\nYou are a senior market research analyst with 15 years of experience in [INDUSTRY]. You specialize in identifying market opportunities, analyzing competitive landscapes, and providing data-driven strategic recommendations.\n\n**TASK:**\nConduct a comprehensive market analysis for [PRODUCT/SERVICE NAME]. Include:\n- Market size estimation (TAM, SAM, SOM)\n- Key market trends and growth drivers\n- Target customer segments with demographics\n- Competitive landscape overview (top 5 players)\n- Barriers to entry and regulatory considerations\n- Strategic opportunities and threats\n\n**CONTEXT:**\nIndustry: [INDUSTRY NAME]\nGeographic Focus: [REGION/COUNTRY]\nProduct Description: [BRIEF PRODUCT DESCRIPTION]\nTarget Audience: [PRIMARY TARGET CUSTOMERS]\nBudget/Stage: [STARTUP STAGE - e.g., Pre-seed, Series A]\n\n**FORMAT:**\nStructure as an executive briefing document with:\n- Executive summary (3-4 sentences)\n- Sections with clear headers\n- Data points and statistics where available\n- Actionable recommendations at the end\n- Total length: 800-1200 words\n\n---\n\n**Variables to customise:**\n- `[INDUSTRY]` - Your target industry (e.g., Fintech, EdTech, HealthTech)\n- `[PRODUCT/SERVICE NAME]` - Name of your product or service\n- `[REGION/COUNTRY]` - Geographic focus (e.g., India, Southeast Asia, Global)\n- `[BRIEF PRODUCT DESCRIPTION]` - One-sentence description\n- `[PRIMARY TARGET CUSTOMERS]` - Who you are building for\n- `[STARTUP STAGE]` - Current funding/development stage"},{"id":"multi-stage-research-workflow","title":"Multi-Stage Research Workflow","topic":"Research","source":"template","what":"A four-stage workflow that sequences Deep Research, NotebookLM source enrichment, synthesis analysis, and VC validation into a complete end-to-end research process for startup validation.","when":"Use this as the master workflow when preparing for a fundraising round or major product decision, running each stage in sequence across Deep Research and NotebookLM tools.","prompt":"**Stage 1: Broad Discovery (Deep Research)**\n\nRun the Market Landscape Analysis prompt:\n- What is the current [MARKET] landscape in [REGION]?\n- Export the report and save all cited sources\n\n---\n\n**Stage 2: Source Enrichment (NotebookLM)**\n\n- Upload the Deep Research report to NotebookLM\n- Use \"Discover Sources\" to find related articles\n- Add your own documents (pitch deck, product spec, user interviews)\n- Upload competitor websites if available\n\n---\n\n**Stage 3: Synthesis (NotebookLM Analysis)**\n\nRun in sequence:\n1. Competitive analysis prompt (Comprehensive Competitor Comparison Table)\n2. User research prompt (Pain Point Extraction or User Motivation Analysis)\n3. Generate Audio Overview for your team\n\n---\n\n**Stage 4: Validation (Skeptical VC)**\n\n1. Set up the VC Persona using the Skeptical VC Persona Setup prompt\n2. Run the Pitch Evaluation Request prompt\n3. Run the Follow-up Prioritisation prompt\n4. Create an action plan based on the feedback\n\n---\n\n**Variables to customise:**\n- `[MARKET]` - Your product category\n- `[REGION]` - Geographic scope\n- Replace each stage's prompt reference with your specific variables from those individual templates\n\n**Recommended sequence for time-constrained founders:**\nCompetitive Analysis prompt -> User Research prompt -> VC Evaluation prompt"},{"id":"positioning-gap-analysis","title":"Positioning Gap Analysis","topic":"Research","source":"template","what":"A prompt that cross-references your user pain points against how named competitors position themselves, identifying which needs are addressed, which are ignored, and where differentiation opportunities exist.","when":"Use this in NotebookLM after uploading user research and competitor materials, to turn raw pain point data into a defensible positioning argument.","prompt":"Compare these user pain points to how [COMPETITOR 1], [COMPETITOR 2], and [COMPETITOR 3] position themselves.\n\nAre any of my users' needs unaddressed by competitors?\n\nInclude:\n1. What each competitor emphasises in messaging\n2. Which pain points they address\n3. Which pain points they ignore\n4. Opportunities for differentiation\n\n---\n\n**Variables to customise:**\n- `[COMPETITOR 1], [COMPETITOR 2], [COMPETITOR 3]` - The competitors you want to compare against\n- User pain points should be provided as context (paste them before this prompt, or upload to NotebookLM)\n\n**Example:**\nCompare these user pain points to how Simpl, LazyPay, and Slice position themselves. Are any of my users' needs unaddressed by competitors?"},{"id":"research-gap-identification","title":"Research Gap Identification","topic":"Research","source":"template","what":"A prompt that audits your uploaded research to identify what critical questions you cannot yet answer, which perspectives are missing, what data points you are assuming without validation, and which customer segments or competitors have not been researched.","when":"Use this in NotebookLM mid-research or before a key decision point to find the holes in your evidence base before they surface in a pitch or product conversation.","prompt":"Based on everything I've uploaded, what are the biggest gaps in my research?\n\nIdentify:\n1. Questions I should be able to answer but can't yet\n2. Critical perspectives that are missing\n3. Data points I'm assuming but haven't validated\n4. Competitor information I'm lacking\n5. Customer segments I haven't researched\n\n---\n\n**How to use:**\nUpload all available research to NotebookLM before running this prompt. No additional variables to fill in - the output will be specific to what you have and have not uploaded."},{"id":"user-pain-point-extraction","title":"User Pain Point Extraction","topic":"Research","source":"template","what":"A structured prompt that analyses a set of uploaded user interview transcripts to surface the top pain points by frequency, with direct user quotes, attribution to source interviews, and a citation-ready format.","when":"Use this in NotebookLM after uploading all interview transcripts, to produce a rigorous, evidence-backed pain point summary you can use in pitches or product decisions.","prompt":"Based on all [NUMBER] user interviews, what are the top 3 pain points [TARGET AUDIENCE] mentioned about [TOPIC/PRODUCT AREA]?\n\nList them in order of frequency mentioned, provide specific quotes from users, and cite which interviews mentioned each point.\n\nFormat:\n1. Pain Point Name (mentioned in X out of Y interviews)\n2. Brief description\n3. 2-3 direct user quotes with attribution\n4. List of interview sources\n\n---\n\n**Variables to customise:**\n- `[NUMBER]` - Total number of interviews uploaded\n- `[TARGET AUDIENCE]` - The user group (e.g., Gen Z users, SME owners, first-time buyers)\n- `[TOPIC/PRODUCT AREA]` - The specific area to focus on (e.g., payment options, onboarding experience)\n\n**Example:**\nBased on all 8 user interviews, what are the top 3 pain points Gen Z users mentioned about payment options and credit access? List them in order of frequency mentioned, provide specific quotes from users, and cite which interviews mentioned each point."},{"id":"screenshot-clone-basic","title":"Screenshot Clone (Basic)","topic":"Development","source":"template","what":"A minimal prompt for turning any uploaded screenshot, design mockup, or competitor page into a working, fully responsive app using an AI coding tool.","when":"Use this when you have a visual reference you want to replicate quickly and don't need to specify modifications upfront - just clone it and iterate from there.","prompt":"```\nBuild a clone of this app. Make it fully responsive.\n```\n\nSend this with your uploaded screenshot or image."},{"id":"screenshot-clone-with-modifications","title":"Screenshot Clone with Modifications","topic":"Development","source":"template","what":"A structured prompt for cloning a screenshot or existing UI while specifying exactly which elements to keep and which to change - useful for rebranding competitor patterns or adapting a design for a new context.","when":"Use this when you have a design you want to adapt rather than copy exactly - for example, applying your own branding, swapping out content, or updating specific components while preserving the overall layout.","prompt":"```\nBuild a clone of this [PAGE TYPE - e.g., landing page, dashboard, form].\n\nKEEP:\n- [ELEMENT 1 - e.g., overall layout structure]\n- [ELEMENT 2 - e.g., color scheme]\n- [ELEMENT 3 - e.g., typography style]\n\nCHANGE:\n- [MODIFICATION 1 - e.g., Replace logo with \"[YOUR COMPANY]\"]\n- [MODIFICATION 2 - e.g., Change headline to \"[YOUR HEADLINE]\"]\n- [MODIFICATION 3 - e.g., Update button text to \"[YOUR CTA]\"]\n\nMake it fully responsive and functional.\n```\n\n**Industry example (Real Estate):**\n```\nBuild a clone of this property listing page.\n\nKEEP:\n- Grid layout for property cards\n- Image gallery functionality\n- Filter sidebar structure\n\nCHANGE:\n- Replace company name with \"Urban Nest Properties\"\n- Change primary color from blue to forest green (#2D5A3D)\n- Update contact form to collect: Name, Phone, Property Interest, Viewing Date Preference\n- Add \"Virtual Tour Available\" badge to property cards\n\nMake it fully responsive and functional.\n```\n\n**Industry example (Restaurant):**\n```\nBuild a clone of this restaurant menu page.\n\nKEEP:\n- Section-based layout (Appetizers, Mains, Desserts)\n- Image-text card design\n- Price display format\n\nCHANGE:\n- Replace restaurant name with \"Spice Route Kitchen\"\n- Change color scheme to warm orange (#FF6B35) and cream (#FFF8E7)\n- Add dietary icons (vegetarian, vegan, gluten-free) next to each item\n- Include \"Order Online\" button that links to [YOUR ORDERING SYSTEM]\n\nMake it fully responsive with mobile-friendly menu navigation.\n```"},{"id":"adapting-visual-inspiration-to-your-brand","title":"Adapting Visual Inspiration to Your Brand","topic":"Creative","source":"template","what":"A prompt for generating a new, brand-specific image that preserves selected aesthetic elements from an existing inspiration image while replacing subject matter, colours, and mood to match your brand.","when":"Use this as the second step after running the \"Analysing Visual Inspiration\" prompt on an image you admire. Useful when you want to borrow the compositional quality or lighting style of a strong visual without copying it, and need to translate it into your own brand's context.","prompt":"Based on the analysis above, create a new image with the following modifications:\n\nKEEP (Aesthetic elements to preserve):\n- [Element 1 from inspiration, e.g., \"Soft, natural lighting\"]\n- [Element 2, e.g., \"Shallow depth of field\"]\n- [Element 3, e.g., \"Warm, inviting color palette\"]\n\nCHANGE (Adapt to my brand):\n- SUBJECT: Instead of [original subject], show [your subject]\n- COLORS: Replace [original colors] with:\n  - Primary: [Your brand HEX]\n  - Secondary: [Your brand HEX]\n  - Accent: [Your brand HEX]\n- MOOD: Shift from [original mood] to [your brand mood]\n- CONTENT: Include [brand-specific elements, e.g., your product, logo, text]\n\nBRAND CONTEXT:\n- Brand name: [YOUR BRAND]\n- Target audience: [WHO YOU'RE SPEAKING TO]\n- Key message: [WHAT THIS IMAGE SHOULD COMMUNICATE]\n\nOUTPUT: Generate an original image that captures the aesthetic inspiration while being\ncompletely unique to [YOUR BRAND].\n\n---\n\n### Example: Adapting a Fashion Ad to FinTech\n\nBased on the fashion ad analysis above, create a new image with these modifications:\n\nKEEP:\n- Clean, modern aesthetic with bold graphic overlay\n- Confident subject in aspirational setting\n- Layered composition with circular graphic element\n- Professional studio lighting quality\n\nCHANGE:\n- SUBJECT: Instead of a model in fashion, show a young Indian professional (early 20s) at a\n  desk, focused on phone showing a credit dashboard\n- COLORS: Replace the fashion brand's pastels with:\n  - Primary: Electric blue (#0066FF)\n  - Secondary: Vibrant purple (#7B2FFF)\n  - Background: Clean white (#FFFFFF)\n- MOOD: Shift from \"aspirational luxury\" to \"confident financial empowerment\"\n- CONTENT: Include PayNow branding, headline \"Build Credit, Not Debt\" in the circular overlay\n\nBRAND CONTEXT:\n- Brand: PayNow\n- Audience: Gen Z in India, credit-curious but debt-wary\n- Message: Financial tools that empower, not trap\n\nOUTPUT: An original social media asset that feels modern and aspirational like the fashion ad,\nbut speaks to financial confidence and smart money habits."},{"id":"analysing-visual-inspiration-cross-modal","title":"Analysing Visual Inspiration (Cross-Modal)","topic":"Creative","source":"template","what":"A structured prompt for extracting a detailed, reusable description of any image's aesthetic - style, subject, composition, lighting, colour palette, and mood - so it can be used as a brief for generating new images in a similar style.","when":"Use this as the first step when you want to replicate or adapt a visual aesthetic you've seen. Feed an existing image into a multimodal AI model with this prompt, then use the output as the foundation for the \"Adapting Inspiration to Your Brand\" prompt. Useful for reverse-engineering brand aesthetics or competitor visuals.","prompt":"Describe this image in extreme detail, as if you were writing a prompt for an\nimage-generation AI.\n\nInclude:\n\n1. STYLE & ARTISTIC APPROACH:\n   - What's the overall aesthetic? (photorealistic, illustrated, 3D, etc.)\n   - What's the artistic quality? (commercial, editorial, casual, polished)\n   - Any specific visual techniques used?\n\n2. SUBJECT & CONTENT:\n   - What/who is in the frame?\n   - What are they doing?\n   - Specific details (clothing, expressions, objects, environment)\n\n3. COMPOSITION & FRAMING:\n   - Camera angle and perspective\n   - How elements are arranged in the frame\n   - Focal points and visual hierarchy\n   - Use of space (tight framing vs. breathing room)\n\n4. LIGHTING & ATMOSPHERE:\n   - Type of lighting (natural, studio, dramatic, soft)\n   - Direction and quality of light\n   - Color temperature (warm, cool, neutral)\n   - Shadows and highlights\n\n5. COLOR PALETTE:\n   - Dominant colors (provide hex codes if possible)\n   - Color relationships (complementary, monochrome, vibrant, muted)\n   - Overall color mood\n\n6. MOOD & EMOTIONAL TONE:\n   - What feeling does this evoke?\n   - What's the energy level? (calm, energetic, serious, playful)\n   - What's the intended audience likely to feel?\n\nBe specific enough that someone could recreate a SIMILAR aesthetic — without recreating\nthis exact image."},{"id":"blog-post-and-content-outline","title":"Blog Post and Content Outline","topic":"Creative","source":"template","what":"A structured prompt for generating a detailed blog post outline including hook, problem setup, section breakdown with supporting evidence, actionable conclusion, CTA, and SEO considerations.","when":"Use this when planning content marketing pieces where you need a logical, well-structured article before writing. Especially useful when you want to align content strategy (SEO keywords, target audience goals) with the article structure before committing to a full draft.","prompt":"Create a detailed blog post outline for [BLOG TOPIC] targeting [AUDIENCE].\n\nGOAL: [What should readers learn or do after reading?]\n\nSTRUCTURE:\n1. Hook (Opening): How do we grab attention in the first 2 sentences?\n2. Problem Setup: What pain point are we addressing?\n3. Section Breakdown:\n   - [3-5 main sections]\n   - For each section, include:\n     - Main point\n     - Supporting evidence/example\n     - Takeaway\n4. Actionable Conclusion: What's the one thing they should do now?\n5. CTA: What do we want them to do next?\n\nSEO CONSIDERATIONS:\n- Primary keyword: [KEYWORD]\n- Secondary keywords: [LIST]\n- Suggested meta description\n\nTONE: [Your brand voice]\nLENGTH: [Target word count]\n\n---\n\n### Example: Marketing Agency (Social Media)\n\nCreate a detailed blog post outline for \"How to Write Social Media Copy That Actually\nConverts\" targeting small business owners.\n\nGOAL: Teach them the Hook-Value-CTA formula they can use immediately\n\nSTRUCTURE:\n1. Hook: Start with common frustration (posting regularly but seeing no sales)\n2. Problem: Why \"just be authentic\" advice doesn't work\n3. Sections:\n   - The Hook-Value-CTA Formula Explained\n   - Writing Hooks That Stop the Scroll\n   - Delivering Value Without Giving Everything Away\n   - CTAs That Feel Natural, Not Pushy\n4. Conclusion: \"Start with your next post today\"\n5. CTA: Download our free swipe file of 50 proven social media hooks\n\nSEO:\n- Primary: \"social media copywriting\"\n- Secondary: \"how to write social posts,\" \"social media conversion tips\"\n- Meta: Learn the 3-part formula that turns social posts into sales\n\nTONE: Practical, no-BS, supportive (not guru-ish)\nLENGTH: 1,200-1,500 words"},{"id":"brand-copy","title":"Brand Copy","topic":"Creative","source":"template","what":"A PTCF-structured prompt that generates three variations of on-brand marketing copy for any channel or content type, with explicit controls for brand voice, tone, keywords, and forbidden terms.","when":"Use this when you need copy for a website, social media post, email campaign, or advertisement and want to maintain consistent voice across all touchpoints.","prompt":"**PERSONA:**\nYou are an expert copywriter and brand strategist with 10+ years of experience in [INDUSTRY]. You specialise in creating compelling, conversion-focused copy that maintains consistent brand voice while speaking directly to target audiences.\n\n**TASK:**\nCreate [CONTENT TYPE] for [COMPANY NAME] with the following:\n- Primary goal: [GOAL - e.g., Drive sign-ups, Increase awareness, Announce feature]\n- Key message: [MAIN POINT TO COMMUNICATE]\n- Call-to-action: [DESIRED ACTION - e.g., Sign up free, Learn more, Download now]\n\n**CONTEXT:**\nCompany: [COMPANY NAME]\nProduct/Service: [WHAT YOU OFFER]\nTarget Audience: [WHO YOU'RE SPEAKING TO]\nBrand Voice: [DESCRIBE VOICE - e.g., Professional but friendly, Bold and innovative, Warm and trustworthy]\nTone for this piece: [SPECIFIC TONE - e.g., Excited, Urgent, Reassuring, Educational]\nWords to USE: [BRAND KEYWORDS - e.g., Simple, Powerful, Secure]\nWords to AVOID: [OFF-BRAND TERMS - e.g., Cheap, Basic, Complicated]\n\n**FORMAT:**\n- Provide 3 variations of the copy\n- Include headline + body for each\n- Length: [WORD COUNT OR CHARACTER LIMIT]\n- Label each variation (Option A, B, C) with a brief note on its approach\n- Include suggested emojis or hashtags if appropriate for the channel\n\n---\n\n**Variables to customise:**\n- `[INDUSTRY]` - Your market sector\n- `[CONTENT TYPE]` - LinkedIn post, email subject line, landing page hero, ad copy, etc.\n- `[COMPANY NAME]` - Your brand\n- `[GOAL]` - What you want the copy to achieve\n- `[BRAND VOICE]` - How your brand sounds\n- `[WORD COUNT OR CHARACTER LIMIT]` - Length constraints"},{"id":"content-transformation","title":"Content Transformation","topic":"Creative","source":"template","what":"A PTCF-structured prompt that repurposes existing content from one format to another - for example, an article into a Twitter thread, a whitepaper into a LinkedIn post, or a presentation into an email newsletter - while preserving the core message and adapting tone for the new audience.","when":"Use this when you have a piece of content that needs to reach a different audience or appear on a different channel without being rewritten from scratch.","prompt":"**PERSONA:**\nYou are a content strategist who excels at repurposing content across different formats and channels while maintaining the core message and adapting tone for each audience.\n\n**TASK:**\nTransform the following [SOURCE FORMAT] into [TARGET FORMAT]:\n\nSource Content:\n[PASTE ORIGINAL CONTENT]\n\n**CONTEXT:**\nSource Format: [ORIGINAL FORMAT - e.g., Blog post, Whitepaper, Presentation]\nTarget Format: [DESIRED FORMAT - e.g., Twitter thread, LinkedIn post, Email newsletter]\nOriginal Audience: [WHO IT WAS WRITTEN FOR]\nNew Audience: [WHO WILL SEE THE NEW FORMAT]\nKey Message to Preserve: [MAIN POINT THAT MUST COME THROUGH]\n\n**FORMAT:**\n- Adapt tone for target platform\n- Follow platform best practices (character limits, hashtags, etc.)\n- Preserve key insights and data points\n- Include call-to-action appropriate for the channel\n- Provide [NUMBER] variations if requested\n\n---\n\n**Variables to customise:**\n- `[SOURCE FORMAT]` - Original content type\n- `[TARGET FORMAT]` - Desired output format\n- `[PASTE ORIGINAL CONTENT]` - The source material\n- `[WHO IT WAS WRITTEN FOR]` - Original audience\n- `[WHO WILL SEE THE NEW FORMAT]` - Target audience\n- `[NUMBER]` - How many variations needed"},{"id":"flat-vector-icon-set","title":"Flat Vector Icon Set","topic":"Creative","source":"template","what":"A detailed image-generation prompt for creating a cohesive set of flat vector app icons, specifying style, subject, composition, and colour palette to ensure visual consistency across all icons.","when":"Use this when you need a set of app or feature icons that share a consistent visual language. Works with image-generation tools such as Midjourney, DALL-E, or Imagen. Providing hex codes and reference brands significantly improves consistency.","prompt":"Generate a set of [NUMBER] app icons for [YOUR PRODUCT/FEATURE].\n\nSTYLE:\n- Flat vector art, minimalist\n- Consistent line weight and visual style\n- Modern and clean (reference: [BRAND COMPARISON if helpful])\n\nSUBJECT:\nIcon 1: [Describe what it represents + key visual element]\nIcon 2: [...]\nIcon 3: [...]\n\nCOMPOSITION:\n- Arrangement: [Horizontal row / Grid layout / Circular arrangement]\n- Spacing: Equal spacing between icons\n- Background: [Color or transparent]\n- Icon size: Each icon should be similar in visual weight\n\nLIGHTING/COLORS:\n- Primary color: [HEX CODE] ([COLOR NAME])\n- Secondary color: [HEX CODE] ([COLOR NAME])\n- Accent: [HEX CODE if needed]\n- Background: [HEX CODE]\n- Reference brands for style: [e.g., Stripe, Revolut, Notion]\n\nOUTPUT: Icons should be crisp, recognizable at small sizes, and visually cohesive.\n\n---\n\n### Example: Fitness App\n\nGenerate a set of 4 app icons for FitTrack's main features.\n\nSTYLE:\n- Flat vector art, minimalist\n- Consistent 3px line weight\n- Modern and energetic (reference: Nike Training Club, Strava)\n\nSUBJECT:\nIcon 1: A heart rate monitor with a pulse line\nIcon 2: A dumbbell or weight\nIcon 3: A running shoe with motion lines\nIcon 4: A water droplet (hydration tracker)\n\nCOMPOSITION:\n- Arrangement: Horizontal row\n- Spacing: Equal spacing, 40px between icons\n- Background: White (#FFFFFF)\n- Icon size: Each 120x120px visual area\n\nLIGHTING/COLORS:\n- Primary color: Electric blue (#0066FF)\n- Secondary color: Vibrant orange (#FF6B35)\n- Icons use gradient from blue to orange\n- Background: White (#FFFFFF)\n- Reference: Peloton's vibrant, energetic color palette\n\nOUTPUT: Icons should feel energetic and motivating, recognizable at app size."},{"id":"landing-page-hero-image","title":"Landing Page Hero Image","topic":"Creative","source":"template","what":"A detailed image-generation prompt for creating a product photography-style hero image, specifying subject, composition, lighting, colour palette, and emotional tone to produce a usable landing page visual.","when":"Use this when you need a hero image for a landing page and want to direct an AI image tool with enough precision to produce something on-brand. Particularly useful when you do not have a photographer or designer available and need a rapid visual prototype.","prompt":"STYLE: [Photorealistic / Illustrated / 3D Render] [PRODUCT CATEGORY] photography\n\nSUBJECT:\n- Main focus: [What's the central element?]\n- Details: [Age, clothing, expression, objects, screen content if showing UI]\n- Action/pose: [What are they doing?]\n\nCOMPOSITION:\n- Camera angle: [Eye-level / Slightly above / Dramatic low angle / etc.]\n- Framing: [Close-up / Medium shot / Wide shot]\n- Focal point: [What should be sharpest/most emphasized?]\n- Background: [Detailed description or \"blurred\" or \"minimal\"]\n- Depth: [Shallow depth of field / Everything in focus]\n\nLIGHTING:\n- Type: [Natural window light / Studio lighting / Golden hour / etc.]\n- Direction: [Front-lit / Side-lit / Backlit]\n- Mood: [Bright and airy / Warm and cozy / Dramatic / Professional]\n- Color temperature: [Warm / Cool / Neutral]\n\nCOLORS:\n- Primary brand color: [HEX]\n- Supporting colors: [HEX, HEX]\n- Overall palette feel: [e.g., \"Clean and modern\" / \"Warm and inviting\"]\n\nEMOTIONAL TONE:\n[What should the viewer feel? Confident? Relaxed? Excited? Professional?]\n\n---\n\n### Example: SaaS Productivity Tool\n\nSTYLE: Photorealistic workspace product photography\n\nSUBJECT:\n- Main focus: Laptop screen displaying TaskFlow dashboard with clean UI\n- Details: Modern minimalist desk setup, coffee cup, notebook, phone visible\n- Screen content: Dashboard showing completed tasks with green checkmarks\n- No person in frame — focus is on the aspirational workspace\n\nCOMPOSITION:\n- Camera angle: 45-degree angle looking down at the desk\n- Framing: Medium shot capturing the full desk workspace\n- Focal point: Laptop screen (sharp), with soft blur on surrounding objects\n- Background: Soft-focused indoor plants and natural light\n- Depth: Shallow depth of field to create professional look\n\nLIGHTING:\n- Type: Soft natural morning window light from the left\n- Direction: Side-lighting creating gentle shadows\n- Mood: Bright, productive, and inspiring\n- Color temperature: Slightly warm (but not orange)\n\nCOLORS:\n- Primary: Navy blue (#1A237E) for app UI\n- Supporting: Soft grey (#F5F5F5), warm wood tones\n- Accents: Fresh green from plants\n- Overall: Clean, professional, calming\n\nEMOTIONAL TONE:\nOrganized calm, productive morning energy, \"I've got this\" confidence"},{"id":"social-media-graphics","title":"Social Media Graphics","topic":"Creative","source":"template","what":"A detailed image-generation prompt for creating platform-optimised social media graphics (Instagram, LinkedIn), specifying layout, content hierarchy, colour, brand elements, and post purpose.","when":"Use this when you need to brief an AI image tool or designer on a specific social post graphic. Works for announcements, promotions, educational carousels, or any post requiring a designed visual rather than a photo.","prompt":"Create a [PLATFORM]-optimized graphic for [POST PURPOSE].\n\nSTYLE:\n- Visual style: [Bold and modern / Minimal and clean / Playful illustration / etc.]\n- Reference inspiration: [Brand or style you admire]\n\nCONTENT:\n- Main headline: \"[YOUR TEXT]\"\n- Subtext (if any): \"[SUPPORTING TEXT]\"\n- Visual elements: [Icons, shapes, photos, illustrations?]\n\nLAYOUT:\n- Orientation: [Square 1:1 / Portrait 4:5 / Story 9:16]\n- Text placement: [Centered / Top-third / Left-aligned / etc.]\n- Hierarchy: [What's biggest? What catches the eye first?]\n\nCOLORS:\n- Background: [Solid color HEX / Gradient / Image with overlay]\n- Text color: [HEX]\n- Accent colors: [HEX, HEX]\n- Overall mood: [Energetic / Professional / Calming / etc.]\n\nBRAND ELEMENTS:\n- Logo placement: [Bottom corner / Top / Watermark / None]\n- Font style: [Bold sans-serif / Modern serif / Playful / etc.]\n- Brand colors: [HEX codes]\n\nPURPOSE:\n[Is this announcing something? Educating? Driving traffic? Engagement?]\n\n---\n\n### Example: E-commerce Flash Sale\n\nCreate an Instagram Story graphic for a 24-hour flash sale announcement.\n\nSTYLE:\n- Visual style: Bold, urgent, eye-catching (reference: Glossier sale posts)\n- High-contrast, modern e-commerce aesthetic\n\nCONTENT:\n- Main headline: \"24-HOUR FLASH SALE\"\n- Subtext: \"40% Off Everything\"\n- Visual elements: Large percentage \"40%\" dominates, countdown timer element\n\nLAYOUT:\n- Orientation: Story 9:16\n- Text placement: Top third for headline, center for \"40%\", bottom for CTA\n- Hierarchy: \"40%\" is the hero element, then headline, then CTA\n\nCOLORS:\n- Background: Vibrant gradient (hot pink #FF006E to orange #FF8C00)\n- Text color: White (#FFFFFF) for maximum contrast\n- Accent: Yellow (#FFD60A) for the countdown timer\n- Overall mood: Urgent, exciting, unmissable\n\nBRAND ELEMENTS:\n- Logo: Small, bottom-left corner in white\n- Font: Bold sans-serif, all caps for urgency\n- Maintain brand's fun, energetic personality\n\nPURPOSE:\nDrive immediate action — swipe up to shop before time runs out"},{"id":"meeting-summary","title":"Meeting Summary","topic":"Productivity","source":"template","what":"A PTCF-structured prompt that transforms raw meeting transcripts or notes into a structured summary with key discussion points, decisions, action items (with owners and due dates), and open questions.","when":"Use this immediately after any meeting - standups, client calls, board meetings - to produce a shareable summary ready to send via email or Slack.","prompt":"**PERSONA:**\nYou are an executive assistant skilled at distilling meetings into clear, actionable summaries. You capture key decisions, action items with owners, and follow-up requirements.\n\n**TASK:**\nSummarise the following meeting notes/transcript and extract:\n1. Meeting overview (who, what, when)\n2. Key discussion points (3-5 main topics)\n3. Decisions made\n4. Action items with owner and due date\n5. Open questions or parking lot items\n6. Next meeting date/agenda (if discussed)\n\nMeeting Notes:\n[PASTE MEETING TRANSCRIPT OR NOTES]\n\n**CONTEXT:**\nMeeting Type: [TYPE - e.g., Team standup, Client call, Board meeting]\nAttendees: [LIST OF PARTICIPANTS]\nMeeting Goal: [PURPOSE OF THE MEETING]\n\n**FORMAT:**\n- Use clear headers for each section\n- Action items as table: Task | Owner | Due Date\n- Keep summary under 500 words\n- Ready to share via email or Slack\n\n---\n\n**Variables to customise:**\n- `[PASTE MEETING TRANSCRIPT OR NOTES]` - Raw meeting content\n- `[TYPE]` - Meeting category\n- `[LIST OF PARTICIPANTS]` - Who attended\n- `[PURPOSE OF THE MEETING]` - Meeting objective"},{"id":"professional-email-draft","title":"Professional Email Draft","topic":"Productivity","source":"template","what":"A PTCF-structured prompt that drafts professional business emails for any scenario - partnerships, investor outreach, meeting requests, follow-ups, or announcements - with a compelling subject line and clear call-to-action.","when":"Use this whenever you need to write a business email where the relationship, tone, and objective need to be carefully calibrated, particularly for cold outreach or high-stakes communication.","prompt":"**PERSONA:**\nYou are a professional business communicator with expertise in [EMAIL CONTEXT - e.g., startup communications, B2B sales, investor relations]. You write clear, concise emails that achieve their intended purpose while maintaining appropriate professionalism.\n\n**TASK:**\nDraft a professional email for the following situation:\n\nEmail Type: [TYPE - e.g., Partnership inquiry, Meeting request, Follow-up, Announcement]\nObjective: [WHAT YOU WANT TO ACHIEVE]\nKey Points to Include: [2-3 MAIN POINTS]\n\n**CONTEXT:**\nFrom: [YOUR NAME AND ROLE]\nTo: [RECIPIENT NAME AND ROLE]\nRelationship: [NEW CONTACT / EXISTING RELATIONSHIP / WARM INTRO]\nPrevious Interaction: [ANY RELEVANT HISTORY - e.g., Met at conference, Previous email]\nUrgency: [HIGH / MEDIUM / LOW]\n\n**FORMAT:**\n- Include a compelling subject line\n- Keep email to [LENGTH - e.g., 3-4 sentences, Under 150 words]\n- Tone: [TONE - e.g., Professional, Friendly, Formal, Warm but firm]\n- Include clear call-to-action\n- Use appropriate greeting and sign-off\n\n---\n\n**Variables to customise:**\n- `[EMAIL CONTEXT]` - Domain expertise needed (e.g., investor relations, B2B sales)\n- `[TYPE]` - Category of email\n- `[WHAT YOU WANT TO ACHIEVE]` - Email goal\n- `[YOUR NAME AND ROLE]` - Sender info\n- `[RECIPIENT NAME AND ROLE]` - Who you are emailing\n- `[LENGTH]` - Word/sentence limit"},{"id":"data-analysis","title":"Data Analysis","topic":"Data","source":"template","what":"A PTCF-structured prompt that analyses any dataset or metrics export to produce a structured report with key metrics, trends, anomalies, correlation findings, and prioritised recommendations.","when":"Use this when you have data in a spreadsheet, Google Sheets export, or pasted table and need to extract actionable insights for a business decision or stakeholder update.","prompt":"**PERSONA:**\nYou are a senior data analyst specialising in [DOMAIN - e.g., product analytics, financial analysis, marketing metrics]. You excel at finding actionable insights in data and communicating findings clearly to non-technical stakeholders.\n\n**TASK:**\nAnalyse the following data and provide:\n1. Key metrics summary with period-over-period comparison\n2. Top 3 trends or patterns identified\n3. Anomalies or areas of concern\n4. Correlation analysis (if multiple variables)\n5. Actionable recommendations based on findings\n\nData:\n[PASTE DATA OR DESCRIBE DATASET]\n\n**CONTEXT:**\nData Type: [TYPE - e.g., Sales data, User metrics, Financial records]\nTime Period: [PERIOD - e.g., Last 30 days, Q3 2024]\nKey Questions to Answer: [SPECIFIC QUESTIONS]\nBusiness Goal: [WHAT DECISION WILL THIS INFORM]\nAudience: [WHO WILL SEE THIS ANALYSIS]\n\n**FORMAT:**\n- Executive summary (2-3 sentences)\n- Key metrics table\n- Insights with supporting data points\n- Recommendations prioritised by impact\n- Use chain-of-thought: show your reasoning step by step\n\n---\n\n**Variables to customise:**\n- `[DOMAIN]` - Area of analysis expertise\n- `[PASTE DATA OR DESCRIBE DATASET]` - The actual data\n- `[TYPE]` - Data category\n- `[SPECIFIC QUESTIONS]` - What you need answered\n- `[WHAT DECISION WILL THIS INFORM]` - Action context"}];
+
+const TOPICS = [
+  { name: 'Built by the Practice', count: USE_CASES.filter(u => u.topic === 'Built by the Practice').length, special: true },
+  { name: 'AI Tooling',            count: USE_CASES.filter(u => u.topic === 'AI Tooling').length },
+  { name: 'Research',              count: USE_CASES.filter(u => u.topic === 'Research').length },
+  { name: 'Development',           count: USE_CASES.filter(u => u.topic === 'Development').length },
+  { name: 'Creative',              count: USE_CASES.filter(u => u.topic === 'Creative').length },
+  { name: 'Productivity',          count: USE_CASES.filter(u => u.topic === 'Productivity').length },
+  { name: 'Data',                  count: USE_CASES.filter(u => u.topic === 'Data').length }
+];
+
+// ── State ─────────────────────────────────────────────────────
+let activeFilter  = null;
+let activeQuery   = '';
+let currentDrawer = null;
+
+// ── Init ──────────────────────────────────────────────────────
+function init() {
+  // Stats
+  document.getElementById('statTotal').textContent = USE_CASES.length;
+  document.getElementById('statBuilt').textContent = USE_CASES.filter(u => u.source === 'built').length;
+  document.getElementById('statTopics').textContent = TOPICS.length;
+  document.getElementById('heroCount').textContent = USE_CASES.length;
+  document.getElementById('explorerVisibleCount').textContent = USE_CASES.length;
+
+  renderTopicGrid();
+  renderLandingChips();
+  renderExplorerChips();
+  renderLandingResults();
+  renderExplorerCards();
+
+  // Search bindings
+  document.getElementById('landingSearch').addEventListener('input', e => {
+    activeQuery = e.target.value.toLowerCase();
+    renderLandingResults();
+  });
+  document.getElementById('explorerSearch').addEventListener('input', e => {
+    activeQuery = e.target.value.toLowerCase();
+    renderExplorerCards();
+  });
+
+  // Esc closes drawer
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (document.getElementById('drawer').classList.contains('open')) closeDrawer();
+      else if (document.getElementById('explorerView').classList.contains('visible')) showLanding();
+    }
+  });
+}
+
+// ── Topic tiles ───────────────────────────────────────────────
+function renderTopicGrid() {
+  const grid = document.getElementById('topicGrid');
+  grid.innerHTML = TOPICS.map(t => `
+    <div class="l-topic-tile ${t.special ? 'built-tile' : ''}" onclick="showExplorer('${escAttr(t.name)}')">
+      <div class="l-tile-count">${String(t.count).padStart(2, '0')}</div>
+      <div class="l-tile-name">${t.name}</div>
+      <div class="l-tile-label">use cases</div>
+    </div>
+  `).join('');
+}
+
+// ── Landing chips (mini filter) ───────────────────────────────
+function renderLandingChips() {
+  const c = document.getElementById('landingChips');
+  c.innerHTML = ['All', ...TOPICS.map(t => t.name)].map(name => `
+    <div class="l-chip ${(activeFilter === null && name === 'All') || activeFilter === name ? 'active' : ''}"
+         onclick="setLandingFilter('${escAttr(name)}')">${name}</div>
+  `).join('');
+}
+function setLandingFilter(name) {
+  activeFilter = name === 'All' ? null : name;
+  renderLandingChips();
+  renderLandingResults();
+}
+
+// ── Explorer chips ────────────────────────────────────────────
+function renderExplorerChips() {
+  const c = document.getElementById('chipContainer');
+  c.innerHTML = ['All', ...TOPICS.map(t => t.name)].map(name => `
+    <div class="e-chip ${(activeFilter === null && name === 'All') || activeFilter === name ? 'active' : ''}"
+         onclick="setExplorerFilter('${escAttr(name)}')">${name}</div>
+  `).join('');
+}
+function setExplorerFilter(name) {
+  activeFilter = name === 'All' ? null : name;
+  renderExplorerChips();
+  renderExplorerCards();
+}
+
+// ── Filter helper ─────────────────────────────────────────────
+function filterUseCases() {
+  return USE_CASES.filter(u => {
+    if (activeFilter && u.topic !== activeFilter) return false;
+    if (activeQuery) {
+      const hay = (u.title + ' ' + u.what + ' ' + u.when + ' ' + u.prompt + ' ' + u.topic).toLowerCase();
+      if (!hay.includes(activeQuery)) return false;
+    }
+    return true;
+  });
+}
+
+// ── Landing results list ──────────────────────────────────────
+function renderLandingResults() {
+  const filtered = filterUseCases();
+  const r = document.getElementById('landingResults');
+  document.getElementById('landingResultCount').textContent = filtered.length;
+  if (!filtered.length) {
+    r.innerHTML = `<div style="padding: 32px 20px; text-align:center; color: var(--muted-2); font-size: 12.5px;">No matches. Try clearing the search.</div>`;
+    return;
+  }
+  r.innerHTML = filtered.slice(0, 80).map((u, i) => `
+    <div class="l-result" onclick="openDrawer('${u.id}')" style="animation-delay: ${Math.min(i * 0.015, 0.3)}s">
+      <div class="l-result-dot"></div>
+      <div class="l-result-info">
+        <div class="l-result-title">${esc(u.title)}</div>
+        <div class="l-result-topic">${esc(u.topic)}</div>
+      </div>
+      <div class="l-result-badge ${u.source}">${u.source === 'built' ? 'Built' : 'Template'}</div>
+      <div class="l-result-arrow">&rsaquo;</div>
+    </div>
+  `).join('');
+}
+
+// ── Explorer cards ────────────────────────────────────────────
+function renderExplorerCards() {
+  const filtered = filterUseCases();
+  const grid = document.getElementById('cardGrid');
+  document.getElementById('explorerVisibleCount').textContent = filtered.length;
+  document.getElementById('explorerVisibleCount2').textContent = filtered.length;
+
+  if (!filtered.length) {
+    grid.innerHTML = `
+      <div class="e-empty">
+        <div class="e-empty-icon">&#9676;</div>
+        <div class="e-empty-text">No matches</div>
+        <div class="e-empty-sub">Try clearing the search or picking a different topic.</div>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((u, i) => `
+    <div class="e-card ${u.source}" onclick="openDrawer('${u.id}')" style="animation-delay: ${Math.min(i * 0.015, 0.3)}s">
+      <div class="e-card-header">
+        <div class="e-card-topic">${esc(u.topic)}</div>
+        <div class="e-card-badge ${u.source}">${u.source === 'built' ? 'Built' : 'Template'}</div>
+      </div>
+      <div class="e-card-title">${esc(u.title)}</div>
+      <div class="e-card-desc">${esc(firstSentence(u.what))}</div>
+      <div class="e-card-foot">
+        <span>Click for prompt</span>
+        <span class="open">Open</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Surprise me ───────────────────────────────────────────────
+function landingSurprise() {
+  const pool = filterUseCases();
+  if (!pool.length) return;
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  openDrawer(pick.id);
+}
+function explorerSurprise() {
+  landingSurprise();
+}
+
+// ── Drawer ────────────────────────────────────────────────────
+function openDrawer(id) {
+  const u = USE_CASES.find(x => x.id === id);
+  if (!u) return;
+  currentDrawer = u;
+
+  // Meta
+  document.getElementById('drawerMeta').innerHTML = `
+    <span class="drawer-topic">${esc(u.topic)}</span>
+    <span class="drawer-source ${u.source}">${u.source === 'built' ? 'Built by us' : 'Template'}</span>
+  `;
+  document.getElementById('drawerTitle').textContent = u.title;
+  document.getElementById('drawerSummary').textContent = firstSentence(u.what);
+  document.getElementById('drawerWhat').textContent = u.what;
+  document.getElementById('drawerWhen').textContent = u.when;
+  document.getElementById('drawerPrompt').textContent = stripFences(u.prompt);
+
+  // Rich details block (only shown for entries that have one)
+  const detailsWrap = document.getElementById('drawerDetailsWrap');
+  const detailsEl = document.getElementById('drawerDetails');
+  if (u.details && u.details.length) {
+    detailsEl.innerHTML = renderDetails(u.details);
+    detailsWrap.hidden = false;
+  } else {
+    detailsEl.innerHTML = '';
+    detailsWrap.hidden = true;
+  }
+  // Reset scroll so long details don't open part-way down
+  document.querySelector('.drawer-body').scrollTop = 0;
+
+  // Reset copy button
+  const cb = document.getElementById('copyBtn');
+  cb.classList.remove('copied');
+  cb.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy prompt';
+
+  document.getElementById('backdrop').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  document.getElementById('backdrop').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+  document.body.style.overflow = '';
+  currentDrawer = null;
+}
+function copyPrompt() {
+  if (!currentDrawer) return;
+  const text = stripFences(currentDrawer.prompt);
+  navigator.clipboard.writeText(text).then(() => {
+    const cb = document.getElementById('copyBtn');
+    cb.classList.add('copied');
+    cb.innerHTML = '&#10003; &nbsp;Copied to clipboard';
+    setTimeout(() => {
+      if (currentDrawer) {
+        cb.classList.remove('copied');
+        cb.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy prompt';
+      }
+    }, 1800);
+  });
+}
+
+// ── View switching ────────────────────────────────────────────
+function showExplorer(topic) {
+  if (topic) {
+    activeFilter = topic;
+    renderExplorerChips();
+    renderLandingChips();
+  }
+  document.getElementById('explorerSearch').value = activeQuery;
+  renderExplorerCards();
+  document.getElementById('explorerView').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+function showLanding() {
+  document.getElementById('explorerView').classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
+// ── Helpers ───────────────────────────────────────────────────
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function escAttr(s) { return String(s).replace(/'/g, "\\'"); }
+function firstSentence(text) {
+  if (!text) return '';
+  const cleaned = text.replace(/\n/g, ' ').trim();
+  const m = cleaned.match(/^.{0,220}?[.!?](?=\s|$)/);
+  return m ? m[0] : cleaned.slice(0, 200) + (cleaned.length > 200 ? '…' : '');
+}
+function stripFences(text) {
+  if (!text) return '';
+  return text.replace(/^\s*```[a-z]*\n?/i, '').replace(/\n?```\s*$/i, '');
+}
+
+// Inline markup for detail-block text: **bold** and [label](url)
+function inlineMarkup(s) {
+  if (s == null) return '';
+  return esc(s)
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+}
+
+// Render a use-case's rich `details` array (optional). Block types:
+// heading | paragraph | stats | bullets | callout | cards | links
+function renderDetails(blocks) {
+  if (!blocks || !blocks.length) return '';
+  return blocks.map(b => {
+    if (b.type === 'heading') {
+      return '<h4 class="d-heading">' + esc(b.text) + '</h4>';
+    }
+    if (b.type === 'paragraph') {
+      return '<p class="d-paragraph">' + inlineMarkup(b.text) + '</p>';
+    }
+    if (b.type === 'stats') {
+      return '<div class="d-stats">' + b.items.map(s =>
+        '<div><div class="v">' + esc(s.v) + '</div><div class="k">' + esc(s.k) + '</div></div>'
+      ).join('') + '</div>';
+    }
+    if (b.type === 'bullets') {
+      return '<ul class="d-bullets">' + b.items.map(it => {
+        if (typeof it === 'string') return '<li>' + inlineMarkup(it) + '</li>';
+        return '<li><strong>' + esc(it.label) + '</strong> ' + inlineMarkup(it.body) + '</li>';
+      }).join('') + '</ul>';
+    }
+    if (b.type === 'callout') {
+      return '<div class="d-callout ' + esc(b.tone || 'purple') + '">' + inlineMarkup(b.text) + '</div>';
+    }
+    if (b.type === 'cards') {
+      return '<div class="d-cards">' + b.items.map(c =>
+        '<div class="d-card">' +
+          '<div class="d-card-n">' + esc(c.num) + '</div>' +
+          '<div class="d-card-body">' +
+            '<div class="d-card-t">' + esc(c.title) + '</div>' +
+            '<div class="d-card-b">' + inlineMarkup(c.body) + '</div>' +
+          '</div>' +
+        '</div>'
+      ).join('') + '</div>';
+    }
+    if (b.type === 'links') {
+      return '<div class="d-links">' + b.items.map(l =>
+        '<a class="d-link" href="' + esc(l.url) + '" target="_blank" rel="noopener">' +
+          esc(l.label) + ' <span>&rarr;</span>' +
+        '</a>'
+      ).join('') + '</div>';
+    }
+    return '';
+  }).join('');
+}
+
+// Boot
+init();
+</script>
+
+</body>
+</html>
